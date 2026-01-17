@@ -8,6 +8,7 @@ export * from "./Card";
 export * from "./Input";
 export * from "./Modal";
 export * from "./Combobox";
+export * from "./MultiCombobox";
 export * from "./FileDrop";
 export * from "./Accordion";
 export * from "./Tabs";
