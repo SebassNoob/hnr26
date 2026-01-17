@@ -31,7 +31,7 @@ datas_files = collect_data_files('litellm')
 
 a = Analysis(
     ['src/main.py'],  # Ensure this path points to your main.py correctly!
-    pathex=[],
+    pathex=['src'],
     binaries=binaries,       # Updated list
     datas=datas,             # Updated list
     hiddenimports=hiddenimports, # Updated list

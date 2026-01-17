@@ -38,6 +38,7 @@ class MomWidget(QWidget):
         self.command_queue = command_queue
         self.messages = messages
         self.original_messages = messages if messages else ["Drink some water.", "Sit up straight."]
+        self.anger = 0  # Anger meter, 0 = normal, higher = angrier
 
         # Window Setup
         self.setWindowFlags(
@@ -102,6 +103,31 @@ class MomWidget(QWidget):
         elif msg_type == "show_blacklist_message":
             process_name = cmd.get("process", "unknown")
             self.show_blacklist_message(process_name)
+
+        elif msg_type == "change_anger":
+            delta = cmd.get("delta", 0)
+            self.update_anger(delta)
+
+    def get_anger_image(self):
+        """Returns the image filename corresponding to the anger level."""
+        if self.anger == 0:
+            return "mom_smiling.png"
+        elif self.anger == 1:
+            return "mom.png"
+        elif self.anger == 2:
+            return "mom_sad.png"
+        elif self.anger == 3:
+            return "mom_angry.png"
+        else:
+            log("Invalid anger level, defaulting to neutral")
+            return "mom.png"
+
+    def update_anger(self, delta):
+        """Update the anger meter and change the sprite accordingly."""
+        self.anger += delta
+        self.anger = max(0, min(3, self.anger))  # Clamp between 0 and 5
+        asset = self.get_anger_image()
+        self.set_look(asset)
 
     def show_blacklist_message(self, process_name):
         """Show a bubble with a message about the blacklisted process."""
