@@ -3,6 +3,7 @@ from features import shutdown
 from features import blacklist
 from features import bargain
 from features import lights_out
+from features import wyd
 import sys
 import os
 import json
@@ -10,6 +11,7 @@ import multiprocessing
 import threading
 from utils import tray, Validation
 from utils import log
+from utils.env import load_env
 
 
 def cleanup_generator(procs):
@@ -26,6 +28,7 @@ def cleanup_generator(procs):
 
 def main():
     multiprocessing.freeze_support()
+    load_env()
     if len(sys.argv) != 2:
         log("Error: expected only one json string as argument")
         log(str(sys.argv))
@@ -90,6 +93,13 @@ def main():
             args=(lights_out_start, lights_out_end, mom_command_queue) 
         )
         procs.append(lights_out_proc)
+
+    # 3. Wyd process
+
+    wyd_proc = multiprocessing.Process(
+        target=wyd.main, args=(mom_command_queue,)
+    )
+    procs.append(wyd_proc)
 
     # Start all background processes
     for p in procs:

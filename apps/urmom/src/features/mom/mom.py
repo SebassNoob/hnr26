@@ -11,8 +11,10 @@ from .bubble import BubbleWidget
 from .popup import PopupWidget
 import signal
 
+from utils import log
+
 # Import SlipperOverlay directly so we can spawn it here
-from features.slipper.slipper import SlipperOverlay
+from features.slipper.slipper import SlipperOverlay 
 
 from utils.paths import get_asset_path
 
@@ -25,17 +27,15 @@ SCREEN_EDGE_MARGIN = 16
 
 _instance = None
 
-
 def get_mom_instance():
     return _instance
-
 
 class MomWidget(QWidget):
     def __init__(self, command_queue=None, messages=None):
         super().__init__()
         global _instance
         _instance = self
-
+        
         self.command_queue = command_queue
         self.messages = messages
         self.original_messages = messages if messages else ["Drink some water.", "Sit up straight."]
@@ -43,15 +43,15 @@ class MomWidget(QWidget):
 
         # Window Setup
         self.setWindowFlags(
-            Qt.WindowType.FramelessWindowHint
-            | Qt.WindowType.WindowStaysOnTopHint
-            | Qt.WindowType.Tool
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowStaysOnTopHint |
+            Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         # Initial Load
         self.load_pixmap(IMAGE_FILENAME)
-
+        
         # Initial Position
         screen_geo = self.screen().geometry()
         start_x = screen_geo.width() - self.width() - 20
@@ -73,7 +73,7 @@ class MomWidget(QWidget):
         if self.command_queue:
             self.ipc_timer = QTimer(self)
             self.ipc_timer.timeout.connect(self.check_queue)
-            self.ipc_timer.start(100)  # Check every 100ms
+            self.ipc_timer.start(100) # Check every 100ms
 
     def check_queue(self):
         """Polls the multiprocessing queue for commands."""
@@ -87,12 +87,17 @@ class MomWidget(QWidget):
     def handle_command(self, cmd):
         """Dispatches commands to modify Mom or trigger events."""
         msg_type = cmd.get("type")
-
+        
         if msg_type == "throw_slipper":
             # Instantiate overlay directly within this process
             self.overlay = SlipperOverlay(self)
             self.overlay.show()
 
+        elif msg_type == "show_bubble_message":
+            text = cmd.get("text", "...")
+            score = cmd.get("score", 0.0)
+            self.show_bubble(text=text, score=score)
+            
         elif msg_type == "set_expression":
             asset = cmd.get("asset", "mom.png")
             self.set_look(asset)
@@ -113,16 +118,32 @@ class MomWidget(QWidget):
             return "mom.png"
         elif self.anger == 2:
             return "mom_sad.png"
-        elif self.anger == 3:
+        elif self.anger >= 3:
             return "mom_angry.png"
         else:
             log("Invalid anger level, defaulting to neutral")
             return "mom.png"
 
     def update_anger(self, delta):
-        """Update the anger meter and change the sprite accordingly."""
+        """Update the anger meter. If it reaches 4, trigger slipper and reset to 3."""
         self.anger += delta
-        self.anger = max(0, min(3, self.anger))  # Clamp between 0 and 5
+        # --- CHANGE ---
+        # Clamp anger at 0, but allow it to increase past 3.
+        self.anger = max(0, self.anger)
+        log(f"Anger updated to: {self.anger}")
+
+        # Check for the slipper threshold
+        if self.anger >= 4:
+            log("Anger threshold reached! Throwing slipper.")
+            
+            # Trigger the slipper attack
+            self.overlay = SlipperOverlay(self)
+            self.overlay.show()
+            
+            # Reset anger back down to the "angry" state
+            self.anger = 3
+
+        # Update Mom's appearance based on the new anger level
         asset = self.get_anger_image()
         self.set_look(asset)
 
@@ -153,7 +174,7 @@ class MomWidget(QWidget):
     def load_pixmap(self, filename):
         img_path = get_asset_path(filename)
         pix = QPixmap(img_path)
-
+        
         if pix.isNull():
             pix = QPixmap(100, 100)
             pix.fill(Qt.GlobalColor.red)
@@ -161,13 +182,8 @@ class MomWidget(QWidget):
             if MOM_SCALE != 1.0:
                 w = int(pix.width() * MOM_SCALE)
                 h = int(pix.height() * MOM_SCALE)
-                pix = pix.scaled(
-                    w,
-                    h,
-                    Qt.AspectRatioMode.KeepAspectRatio,
-                    Qt.TransformationMode.SmoothTransformation,
-                )
-
+                pix = pix.scaled(w, h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        
         self.pixmap = pix
         self.resize(self.pixmap.size())
         self.update()
@@ -184,9 +200,7 @@ class MomWidget(QWidget):
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = True
-            self.drag_start_position = (
-                event.globalPosition().toPoint() - self.frameGeometry().topLeft()
-            )
+            self.drag_start_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             event.accept()
 
     def mouseMoveEvent(self, event: QMouseEvent):
@@ -208,10 +222,17 @@ class MomWidget(QWidget):
         if event.key() == Qt.Key.Key_Escape:
             self.close()
 
-    def show_bubble(self):
+    def show_bubble(self, text=None, score=None):
         if not self.bubble:
-            self.bubble = BubbleWidget(self.geometry(), self.messages)
-        self.bubble.advance_phrase()
+            self.bubble = BubbleWidget(self.geometry())
+        
+        # If text and score are provided, it's a WYD message
+        if text is not None and score is not None:
+            self.bubble.show_message(text, score)
+        # Otherwise, it's a normal click, show the default phrase
+        else:
+            self.bubble.advance_phrase()
+
         self.bubble.set_target_geometry(self.geometry())
         self.bubble.show()
         self.bubble.activateWindow()
@@ -222,7 +243,7 @@ class MomWidget(QWidget):
         screen = self.screen().geometry()
         max_x = max(0, screen.width() - popup.width())
         max_y = max(0, screen.height() - popup.height())
-
+        
         # Simple random position for brevity
         popup.move(random.randint(0, max_x), random.randint(0, max_y))
         popup.show()
@@ -236,13 +257,12 @@ def main(command_queue=None, messages=None):
 
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
-
+    
     # Pass queue to widget
-    window = MomWidget(command_queue, messages)
+    window = MomWidget(command_queue)
     window.show()
-
+    
     sys.exit(app.exec())
-
 
 if __name__ == "__main__":
     main()

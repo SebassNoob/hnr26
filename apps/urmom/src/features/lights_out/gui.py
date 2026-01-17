@@ -160,15 +160,18 @@ class LightsOutDialog(QDialog):
         self.added_minutes = result.get("minutes", 0)
         reply = result.get("reply", "...")
 
-        # 1. Trigger Physical Punishment (if applicable)
-        if result.get("slipper", False):
-            if self.mom_queue:
-                self.mom_queue.put({"type": "throw_slipper"})
+        # --- MODIFIED LOGIC ---
+        # Determine the change in anger based on the negotiation outcome
+        if self.mom_queue:
+            if self.added_minutes > 0:
+                # Successful bargain, decrease anger
+                self.mom_queue.put({"type": "change_anger", "delta": -1})
+            else:
+                # Failed bargain, increase anger. The 'slipper' flag from the AI
+                # indicates a particularly bad excuse, justifying the anger increase.
+                self.mom_queue.put({"type": "change_anger", "delta": 1})
 
-            # Note: We do NOT close the dialog here anymore.
-            # We let it fall through to update the UI below so the user sees WHY.
-
-        # 2. Update UI
+        # Update the result dialog UI
         self.lbl_reply.setText(f'Mom says:\n"{reply}"')
 
         if self.added_minutes > 0:
@@ -177,9 +180,9 @@ class LightsOutDialog(QDialog):
                 "color: green; font-weight: bold; font-size: 14px;"
             )
         else:
-            # If slipper was thrown, make the text redder/angrier
+            # Change the text to be more descriptive of the outcome
             if result.get("slipper", False):
-                self.lbl_added.setText(f"💢 SLIPPER ATTACK! (+0 minutes)")
+                self.lbl_added.setText(f"💢 BAD EXCUSE! Mom is getting angry... (+0 minutes)")
             else:
                 self.lbl_added.setText(f"❌ DENIED: +0 minutes.")
 
