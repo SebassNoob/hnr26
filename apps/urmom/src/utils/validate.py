@@ -20,3 +20,11 @@ class Validation:
             return input_list
         else:
             raise ValueError("Input is not a non-empty list.")
+        
+    @staticmethod
+    def validate_positive_int(input_int: Any) -> int:
+        """Check if the input is a positive integer"""
+        if isinstance(input_int, int) and input_int > 0:
+            return input_int
+        else:
+            raise ValueError("Input is not a positive integer.")

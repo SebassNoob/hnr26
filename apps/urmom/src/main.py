@@ -63,12 +63,14 @@ def main():
     blacklisted_processes = Validation.validate_non_empty_list(
         json_args["blacklistedProcesses"]
     )
+    screenshot_frequency_minutes = Validation.validate_positive_int(json_args["screenshotFrequencyMinutes"])
     
     # Create a queue for sending commands to the Mom process
     mom_command_queue = multiprocessing.Queue()
 
     log(
         f"Parsed arguments: lights_out_start={lights_out_start}, lights_out_end={lights_out_end}"
+        f"screenshot_frequency={screenshot_frequency_minutes} mins"
     )
 
     # Prepare processes list
@@ -97,7 +99,7 @@ def main():
     # 3. Wyd process
 
     wyd_proc = multiprocessing.Process(
-        target=wyd.main, args=(mom_command_queue,)
+        target=wyd.main, args=(mom_command_queue, screenshot_frequency_minutes)
     )
     procs.append(wyd_proc)
 
