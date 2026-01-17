@@ -1,6 +1,5 @@
 import time
 from datetime import datetime, timedelta, time as dt_time
-from utils import log
 from ..windows_api.shutdown import shutdown_computer
 from .gui import show_warning_dialog
 
@@ -45,9 +44,7 @@ def main(start_str, end_str, dev_mode, mom_queue=None):
     while True:
         now = datetime.now()
         diff = target_time - now
-        log(f"Time now: {now.time()}, Target time: {target_time.time()}, Diff: {diff}")
         minutes_left = diff.total_seconds() / 60.0
-        log(f"Minutes left until lights out: {minutes_left}")
         physically_in_window = is_currently_in_blackout(now.time(), t_start, t_end)
 
         if minutes_left <= 0 and (physically_in_window or minutes_left < -1):
