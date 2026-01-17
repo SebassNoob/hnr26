@@ -52,3 +52,4 @@ yarn-error.log*
 uv.lock
 dist-electron/
 release/
+dev_mode.txt

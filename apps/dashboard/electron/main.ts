@@ -40,15 +40,6 @@ function createWindow() {
 		win?.webContents.send("main-process-message", new Date().toLocaleString());
 	});
 
-	// Open DevTools in production to see errors
-	if (!VITE_DEV_SERVER_URL) {
-		win.webContents.openDevTools();
-	}
-
-	// Log console messages from renderer
-	win.webContents.on("console-message", (event, level, message, line, sourceId) => {
-		console.log(`[Renderer Console] ${message}`);
-	});
 
 	if (VITE_DEV_SERVER_URL) {
 		win.loadURL(VITE_DEV_SERVER_URL);
