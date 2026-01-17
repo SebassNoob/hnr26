@@ -1,8 +1,10 @@
 from features import food
 from features import shutdown
+from features import blacklist
 import sys
 import json
 import multiprocessing
+
 
 def main():
     if len(sys.argv) != 2:
@@ -20,10 +22,16 @@ def main():
     slipper_enabled = json_args["slipperEnabled"]
 
     # Start processes
-    #pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
-    #pyqt6_proc.start()
-    lights_out_checker = multiprocessing.Process(target=shutdown.main, args=(lights_out_time,))
+    # pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
+    # pyqt6_proc.start()
+    lights_out_checker = multiprocessing.Process(
+        target=shutdown.main, args=(lights_out_time,)
+    )
     lights_out_checker.start()
+    blacklist_checker = multiprocessing.Process(
+        target=blacklist.main, args=(blacklisted_processes,)
+    )
+    blacklist_checker.start()
     print("Hello from urmom!")
 
 
