@@ -27,6 +27,8 @@ datas.append(('assets', 'assets'))
 if dev_build:
     datas.append(('dev_mode.txt', '.'))
 
+datas.append(('.env', '.')) 
+
 datas_files = collect_data_files('litellm')
 
 a = Analysis(
