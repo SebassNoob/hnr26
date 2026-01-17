@@ -9,6 +9,7 @@ import json
 import multiprocessing
 import threading
 from utils import tray, Validation
+from utils import log
 
 
 def cleanup_generator(procs):
@@ -21,11 +22,6 @@ def cleanup_generator(procs):
         sys.exit(0)
 
     return cleanup
-
-
-def log(text):
-    with open("log.txt", "a") as f:
-        f.write(text + "\n")
 
 
 def main():

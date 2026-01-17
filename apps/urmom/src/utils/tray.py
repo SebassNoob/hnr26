@@ -15,11 +15,3 @@ def create_icon(cleanup_func):
         "urmom", Image.open(get_asset_path("mom.ico")), "UrMom Controller", menu
     )
     return icon
-
-
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    main()
