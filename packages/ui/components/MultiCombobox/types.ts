@@ -10,7 +10,7 @@ export interface MultiComboboxProps {
 	error?: string;
 	items: string[];
 	onValueChange: (values: string[]) => void;
-	defaultValue?: string[];
+	value: string[];
 	containerClassName?: string;
 	placeholder?: string;
 	disabled?: boolean;

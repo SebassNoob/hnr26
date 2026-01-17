@@ -1,13 +1,15 @@
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Input, Button, Text, MultiCombobox } from "@shared/ui";
+import { TimePicker, Button, Text, MultiCombobox } from "@shared/ui";
 
-// ISO time format regex: T[hh]:[mm]:[ss]
-const isoTimeRegex = /^T([0-1][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
+
+// Time format regex: HH:mm
+const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
 
 const configSchema = z.object({
-	lightsOut: z.string().regex(isoTimeRegex, "Must be in format T[hh]:[mm]:[ss] (e.g., T10:20:30)"),
+	lightsOutStart: z.string().regex(timeRegex, "Must be in format HH:mm (e.g., 22:00)"),
+	lightsOutEnd: z.string().regex(timeRegex, "Must be in format HH:mm (e.g., 06:00)"),
 	blacklistedProcesses: z.array(z.string()).min(1, "At least one process is required"),
 	nag: z.array(z.string()).min(1, "At least one nag message is required"),
 	slipperEnabled: z.boolean(),
@@ -16,6 +18,7 @@ const configSchema = z.object({
 type ConfigFormData = z.infer<typeof configSchema>;
 
 export function Configuration() {
+
 	const {
 		register,
 		handleSubmit,
@@ -24,7 +27,8 @@ export function Configuration() {
 	} = useForm<ConfigFormData>({
 		resolver: zodResolver(configSchema),
 		defaultValues: {
-			lightsOut: "T22:00:00",
+			lightsOutStart: "22:00",
+			lightsOutEnd: "06:00",
 			blacklistedProcesses: [],
 			nag: [],
 			slipperEnabled: false,
@@ -48,27 +52,63 @@ export function Configuration() {
 			</div>
 
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-				<Input
-					label="Lights Out Time"
-					placeholder="T22:00:00"
-					description="Time when access is restricted (ISO format: T[hh]:[mm]:[ss])"
-					{...register("lightsOut")}
-					error={errors.lightsOut?.message}
-				/>
+				<div>
+					<Text className="text-sm/6 font-medium text-black dark:text-zinc-200 mb-1">
+						Lights Out Time Range
+					</Text>
+					<Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+						Time range when access is restricted
+					</Text>
+					<div className="grid grid-cols-2 gap-4">
+						<TimePicker
+							label="Start Time"
+							{...register("lightsOutStart")}
+							error={errors.lightsOutStart?.message}
+						/>
+						<TimePicker
+							label="End Time"
+							{...register("lightsOutEnd")}
+							error={errors.lightsOutEnd?.message}
+						/>
+					</div>
+				</div>
 
 				<Controller
 					name="blacklistedProcesses"
 					control={control}
 					render={({ field }) => (
-						<MultiCombobox
-							label="Blacklisted Processes"
-							description="Enter process names to block (e.g., chrome.exe, steam.exe)"
-							placeholder="Type process name and press Enter or Add"
-							items={[]}
-							onValueChange={field.onChange}
-							defaultValue={field.value}
-							error={errors.blacklistedProcesses?.message}
-						/>
+						<div>
+							<div className="flex gap-2 items-end relative">
+								<div className="flex-1">
+									<MultiCombobox
+										label="Blacklisted Processes"
+										description="Enter process names to block (e.g., chrome.exe, steam.exe)"
+										placeholder="Type process name and press Enter or Add"
+										items={[]}
+										onValueChange={field.onChange}
+									value={field.value}
+										error={errors.blacklistedProcesses?.message}
+									/>
+								</div>
+								<Button
+									type="button"
+									onClick={async () => {
+										try {
+											const filePath = await window.ipcRenderer.invoke("select-file");
+											if (filePath) {
+												field.onChange([...field.value, filePath]);
+                        console.log("Selected file:", filePath);
+											}
+										} catch (error) {
+											console.error("Error selecting file:", error);
+										}
+									}}
+									className="absolute top-0 right-0"
+								>
+									Browse
+								</Button>
+							</div>
+						</div>
 					)}
 				/>
 
@@ -82,7 +122,7 @@ export function Configuration() {
 							placeholder="Type a message and press Enter or Add"
 							items={[]}
 							onValueChange={field.onChange}
-							defaultValue={field.value}
+							value={field.value}
 							error={errors.nag?.message}
 						/>
 					)}
@@ -101,6 +141,8 @@ export function Configuration() {
 					>
 						Enable Slipper Mode
 					</label>
+
+		
 				</div>
 				{errors.slipperEnabled && (
 					<Text className="text-red-500 text-xs">{errors.slipperEnabled.message}</Text>

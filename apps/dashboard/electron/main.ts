@@ -1,6 +1,7 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { allowedExecutableExtensions } from "../src/app/Configuration";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -62,6 +63,28 @@ app.on("activate", () => {
 	// dock icon is clicked and there are no other windows open.
 	if (BrowserWindow.getAllWindows().length === 0) {
 		createWindow();
+	}
+});
+
+
+
+ipcMain.handle("select-file", async () => {
+	try {
+		const result = await dialog.showOpenDialog({
+			properties: ["openFile"],
+				filters: [
+					{ name: "Executables", extensions: allowedExecutableExtensions },
+					{ name: "All Files", extensions: ["*"] }
+				]
+		});
+		
+		if (!result.canceled && result.filePaths.length > 0) {
+			return result.filePaths[0];
+		}
+		return null;
+	} catch (error) {
+		console.error("Error selecting file:", error);
+		return null;
 	}
 });
 
