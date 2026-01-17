@@ -14,11 +14,7 @@ TEXT_FONT_HEIGHT = 36
 TEXT_FONT_WEIGHT = win32con.FW_BOLD
 TEXT_PAD_X = 12
 TEXT_PAD_Y = 10
-BUTTON_ID = 1001
 POPUP_INTERVAL_MS = 5000
-BUTTON_WIDTH = 70
-BUTTON_HEIGHT = 28
-BUTTON_PAD_Y = 8
 _last_popup_pos = None
 _text_rect = None
 _main_rect = None
@@ -134,13 +130,6 @@ def main():
             win32gui.ReleaseCapture()
             win32gui.SendMessage(hwnd, win32con.WM_NCLBUTTONDOWN, win32con.HTCAPTION, 0)
             return 0
-        if msg == win32con.WM_COMMAND:
-            if win32api.HIWORD(wparam) == win32con.BN_CLICKED:
-                if win32api.LOWORD(wparam) == BUTTON_ID:
-                    popup_w, popup_h = popup_window.get_popup_size()
-                    px, py = _random_popup_position(popup_w, popup_h, _main_rect)
-                    popup_window.create_popup(hinstance, px, py, TRANSPARENT_COLOR)
-                    return 0
         if msg == win32con.WM_RBUTTONDOWN:
             win32gui.DestroyWindow(hwnd)
             return 0
@@ -165,8 +154,8 @@ def main():
     text_w, text_h = _measure_text(TEXT, TEXT_FONT_HEIGHT, TEXT_FONT_WEIGHT, FONT_NAME)
     text_area_w = text_w + (TEXT_PAD_X * 2)
     text_area_h = text_h + (TEXT_PAD_Y * 2)
-    width = max(text_area_w, BUTTON_WIDTH + (TEXT_PAD_X * 2))
-    height = text_area_h + BUTTON_HEIGHT + BUTTON_PAD_Y
+    width = text_area_w
+    height = text_area_h
     _text_rect = (0, 0, width, text_area_h)
 
     ex_style = win32con.WS_EX_LAYERED | win32con.WS_EX_TOPMOST | win32con.WS_EX_TOOLWINDOW
@@ -185,22 +174,6 @@ def main():
         height,
         0,
         0,
-        hinstance,
-        None,
-    )
-
-    button_x = (width - BUTTON_WIDTH) // 2
-    button_y = text_area_h + (BUTTON_PAD_Y // 2)
-    win32gui.CreateWindow(
-        "BUTTON",
-        "Hi",
-        win32con.WS_CHILD | win32con.WS_VISIBLE | win32con.BS_PUSHBUTTON,
-        button_x,
-        button_y,
-        BUTTON_WIDTH,
-        BUTTON_HEIGHT,
-        hwnd,
-        BUTTON_ID,
         hinstance,
         None,
     )
