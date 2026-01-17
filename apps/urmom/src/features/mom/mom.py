@@ -26,6 +26,9 @@ _running = True
 _mouse_down_pos = None
 _dragging = False
 
+def log(text):
+    with open("log.txt", "a") as f:
+        f.write(text + "\n")
 
 def _paint(hwnd):
     hdc, ps = win32gui.BeginPaint(hwnd)
