@@ -53,32 +53,35 @@ def main():
 
     lights_out_start = json_args["lightsOutStart"]
     lights_out_end = json_args["lightsOutEnd"]
+    nagging_messages = json_args.get("naggingMessages", [])
     blacklisted_processes = json_args["blacklistedProcesses"]
     
-    # --- FIX: IPC Queue ---
     # Create a queue for sending commands to the Mom process
     mom_command_queue = multiprocessing.Queue()
-    # ----------------------
 
     log(f"Parsed arguments: lights_out_start={lights_out_start}, lights_out_end={lights_out_end}")
 
-    # Start processes
+    # Prepare processes list
     procs = []
+
+    # 1. Blacklist Process
     blacklist_checker = multiprocessing.Process(
         target=blacklist.main, args=(blacklisted_processes, dev_mode)
     )
-    blacklist_checker.start()
+    procs.append(blacklist_checker)
 
+    # 2. Lights Out Process (Optional)
     if lights_out_start and lights_out_end:
         lights_out_proc = multiprocessing.Process(
             target=lights_out.main, 
-            # Pass the queue to lights_out so it can talk to Mom
             args=(lights_out_start, lights_out_end, mom_command_queue) 
         )
+        procs.append(lights_out_proc)
 
-    procs.extend([blacklist_checker, lights_out_proc])
+    # Start all background processes
     for p in procs:
         p.start()
+
     print("Hello from urmom!")
 
     # Create and run the tray icon in a separate thread
@@ -87,7 +90,7 @@ def main():
     icon_thread.start()
 
     # Run Mom in the main process (blocking), passing the queue
-    mom.main(mom_command_queue)
+    mom.main(mom_command_queue, nagging_messages)
     print("Hello from urmom!")
 
 if __name__ == "__main__":
