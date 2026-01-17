@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import type { InputProps } from "./types";
 
 const baseInput =
-	"block w-full rounded-sm border-none bg-slate-950/5 dark:bg-white/5 px-3 py-1.5 text-sm/6 dark:text-white text-black";
+	"block w-full rounded-sm border-none bg-slate-950/5 dark:bg-white/5 px-3 py-1.5 text-sm/6 dark:text-white text-black placeholder:text-gray-400 dark:placeholder:text-gray-600";
 const focusInput = "focus:outline-2 focus:outline-blue-500";
 
 export function Input({
@@ -14,6 +14,7 @@ export function Input({
 	className,
 	containerClassName,
 	icon,
+	button,
 	...rest
 }: InputProps) {
 	const inputClass = twMerge(
@@ -21,6 +22,7 @@ export function Input({
 		focusInput,
 		error ? "outline-red-500 outline-1" : "",
 		icon ? "pr-8" : "",
+		button ? "pr-16" : "",
 		className,
 	);
 
@@ -50,6 +52,11 @@ export function Input({
 						<span className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
 							{icon}
 						</span>
+					)}
+					{button && (
+						<div className="absolute inset-y-0 right-0.5 flex items-center">
+							{button}
+						</div>
 					)}
 				</div>
 
