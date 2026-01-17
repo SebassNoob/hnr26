@@ -1,9 +1,11 @@
 import psutil
 import time
 
+
 def log(text):
     with open("log.txt", "a") as f:
         f.write(text + "\n")
+
 
 def find_and_kill_blacklisted_process(blacklisted_processes: list[str]) -> None:
     log("Checking for blacklisted processes...")
@@ -12,7 +14,9 @@ def find_and_kill_blacklisted_process(blacklisted_processes: list[str]) -> None:
             exe_lower = proc.info["exe"].lower() if proc.info["exe"] else ""
             if name.lower() in exe_lower:
                 log(f"Found blacklisted process: {proc.info['exe']}")
-                terminate_blacklisted_process(proc.info["pid"], proc.info["name"], proc.info["exe"])
+                terminate_blacklisted_process(
+                    proc.info["pid"], proc.info["name"], proc.info["exe"]
+                )
     return None
 
 
@@ -26,8 +30,11 @@ def terminate_blacklisted_process(pid: int, name: str, exe: str) -> None:
 
 
 def main(blacklisted_processes: list[str], dev_mode) -> None:
-    if dev_mode != '1':
-        log("Blacklist process started with blacklisted processes: " + ", ".join(blacklisted_processes))
+    if dev_mode != "1":
+        log(
+            "Blacklist process started with blacklisted processes: "
+            + ", ".join(blacklisted_processes)
+        )
         while True:
             find_and_kill_blacklisted_process(blacklisted_processes)
             time.sleep(60)

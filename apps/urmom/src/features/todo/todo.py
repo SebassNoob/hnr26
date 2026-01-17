@@ -130,9 +130,7 @@ def main():
                         win32gui.SetWindowText(input_hwnd, "")
                     return 0
                 if win32api.LOWORD(wparam) == ID_DELETE:
-                    index = win32gui.SendMessage(
-                        list_hwnd, win32con.LB_GETCURSEL, 0, 0
-                    )
+                    index = win32gui.SendMessage(list_hwnd, win32con.LB_GETCURSEL, 0, 0)
                     if index != win32con.LB_ERR:
                         task_id = display_order[index]
                         for i, task in enumerate(tasks):

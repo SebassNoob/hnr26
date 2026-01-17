@@ -118,23 +118,23 @@ def _show_tray_menu(hwnd):
 
 def main():
     global _mom_image, _main_rect, _running
-    
+
     # Load image before creating window
     script_dir = os.path.dirname(__file__)
     image_path = os.path.join(script_dir, IMAGE_FILENAME)
-    
+
     if os.path.exists(image_path):
         # 1. Open image and ensure it has Alpha channel
         src_img = Image.open(image_path).convert("RGBA")
-        
+
         # 2. Create a solid background with the transparent color (Magenta)
         #    PIL RGB for Magenta is (255, 0, 255)
         bg = Image.new("RGB", src_img.size, (255, 0, 255))
-        
+
         # 3. Paste the PNG onto the Magenta background using the alpha channel as a mask
         #    This fills transparent areas with Magenta, which Windows will then remove.
         bg.paste(src_img, (0, 0), src_img)
-        
+
         _mom_image = bg
     else:
         # Fallback if image missing: create a small red box
@@ -187,11 +187,13 @@ def main():
 
     # Calculate dimensions based on image size
     img_w, img_h = _mom_image.size
-    
+
     width = max(img_w, BUTTON_WIDTH)
     height = img_h + BUTTON_HEIGHT + BUTTON_PAD_Y
-    
-    ex_style = win32con.WS_EX_LAYERED | win32con.WS_EX_TOPMOST | win32con.WS_EX_TOOLWINDOW
+
+    ex_style = (
+        win32con.WS_EX_LAYERED | win32con.WS_EX_TOPMOST | win32con.WS_EX_TOOLWINDOW
+    )
     style = win32con.WS_POPUP
     x = (win32api.GetSystemMetrics(win32con.SM_CXSCREEN) - width) // 2
     y = (win32api.GetSystemMetrics(win32con.SM_CYSCREEN) - height) // 2

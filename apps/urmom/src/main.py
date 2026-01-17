@@ -8,9 +8,11 @@ import os
 import json
 import multiprocessing
 
+
 def log(text):
     with open("log.txt", "a") as f:
         f.write(text + "\n")
+
 
 def main():
     multiprocessing.freeze_support()
@@ -20,13 +22,13 @@ def main():
         return
     # Check if dev mode is enabled
     dev_mode = None
-    if hasattr(sys, '_MEIPASS'):  # Running from PyInstaller bundle
-        marker_path = os.path.join(sys._MEIPASS, 'dev_mode.txt')
-        dev_mode = '1' if os.path.exists(marker_path) else '0'
+    if hasattr(sys, "_MEIPASS"):  # Running from PyInstaller bundle
+        marker_path = os.path.join(sys._MEIPASS, "dev_mode.txt")
+        dev_mode = "1" if os.path.exists(marker_path) else "0"
     else:  # Running directly (e.g., in development)
-        dev_mode = os.environ.get('dev', '0')
-    
-    if dev_mode == '1':
+        dev_mode = os.environ.get("dev", "0")
+
+    if dev_mode == "1":
         log("Running in dev mode")
     else:
         log("Running in production mode")
@@ -41,7 +43,9 @@ def main():
     blacklisted_processes = json_args["blacklistedProcesses"]
     nag = json_args["nag"]
     slipper_enabled = json_args["slipperEnabled"]
-    log(f"Parsed arguments: lights_out_time={lights_out_time}, blacklisted_processes={blacklisted_processes}, nag={nag}, slipper_enabled={slipper_enabled}")
+    log(
+        f"Parsed arguments: lights_out_time={lights_out_time}, blacklisted_processes={blacklisted_processes}, nag={nag}, slipper_enabled={slipper_enabled}"
+    )
     # Start processes
     # pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
     # pyqt6_proc.start()
