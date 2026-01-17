@@ -1,5 +1,4 @@
 from features import mom_2 as mom
-from features import shutdown
 from features import blacklist
 from features import bargain
 from features import lights_out
@@ -7,12 +6,23 @@ import sys
 import os
 import json
 import multiprocessing
+import threading
+from utils import tray
+
+def cleanup_generator(procs):
+    def cleanup():
+        print("Shutting down everything...")
+        for p in procs:
+            if p.is_alive():
+                p.terminate() # Graceful request
+                p.join()      # Wait for it to actually stop
+        sys.exit(0)
+    return cleanup
 
 
 def log(text):
     with open("log.txt", "a") as f:
         f.write(text + "\n")
-
 
 def main():
     multiprocessing.freeze_support()
@@ -47,17 +57,27 @@ def main():
         f"Parsed arguments: lights_out_start={lights_out_start}, lights_out_end={lights_out_end}, blacklisted={blacklisted_processes}"
     )
     # Start processes
+    procs = []
     blacklist_checker = multiprocessing.Process(
         target=blacklist.main, args=(blacklisted_processes, dev_mode)
     )
-    blacklist_checker.start()
     if lights_out_start and lights_out_end:
         lights_out_proc = multiprocessing.Process(
             target=lights_out.main, args=(lights_out_start, lights_out_end)
         )
-        lights_out_proc.start()
-    mom.main()
+    mom_proc = multiprocessing.Process(
+        target=mom.main, args=()
+    )
+    procs.extend([blacklist_checker, lights_out_proc, mom_proc])
+    for p in procs:
+        p.start()
     print("Hello from urmom!")
+
+    # Create and run the tray icon in a separate thread
+    icon = tray.create_icon(cleanup_generator(procs))
+    icon_thread = threading.Thread(target=icon.run)
+    icon_thread.start()
+
 
 
 if __name__ == "__main__":
