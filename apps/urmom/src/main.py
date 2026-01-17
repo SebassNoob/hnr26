@@ -1,30 +1,20 @@
 from features import mom
 from features import shutdown
 from features import blacklist
-<<<<<<< HEAD
 from features import bargain
-=======
 from features import lights_out
->>>>>>> bargaining
 import sys
 import json
 import multiprocessing
 
 
 def main():
-    print(sys.argv)
-<<<<<<< HEAD
-=======
-    print(len(sys.argv))
->>>>>>> bargaining
     if len(sys.argv) != 2:
         print("Error: expected only one json string as argument")
         return
     # Extract json data
     try:
-        print("j")
         json_args = json.loads(sys.argv[1])
-        print(json_args)
     except json.JSONDecodeError:
         print("Error: argument is not valid json")
         return
