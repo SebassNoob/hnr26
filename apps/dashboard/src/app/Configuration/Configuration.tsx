@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { TimePicker, Button, Text, MultiCombobox } from "@shared/ui";
 import { useEffect, useEffectEvent } from "react";
 import { configSchema, type Config } from "./configSchema";
+import { Link } from "react-router";
 
 type ConfigFormData = Config;
 
@@ -53,6 +54,8 @@ export function Configuration() {
 			const execResult = await window.ipcRenderer.invoke("execute-urmom", [JSON.stringify(data)]);
 			if (!execResult.success) {
 				alert(`Failed to execute UrMom: ${execResult.stderr}`);
+			} else {
+				await window.ipcRenderer.invoke("close-window");
 			}
 		} catch (error) {
 			console.error("Error saving config:", error);
@@ -61,20 +64,25 @@ export function Configuration() {
 	};
 
 	return (
-		<div className="p-6 max-w-2xl">
+		<div className="p-6">
 			<div className="mb-6">
-				<Text className="text-2xl font-bold text-black dark:text-white">UrMom Launcher</Text>
-				<Text className="text-gray-600 dark:text-gray-400 mt-1">
-					Set your desired configuration options below and save to apply and launch UrMom.
+				<Text className="text-2xl font-bold">UrMom Launcher</Text>
+				<Text description className="mt-1">
+					Set your desired configuration options below and save to apply and launch UrMom. Read more
+					about the application{" "}
+					<span>
+						<Link to="/about" className="text-blue-600 hover:underline">
+							here
+						</Link>
+					</span>
+					.
 				</Text>
 			</div>
 
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 				<div>
-					<Text className="text-sm/6 font-medium text-black dark:text-zinc-200 mb-1">
-						Lights Out Time Range
-					</Text>
-					<Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+					<Text className="text-sm/6 font-medium mb-1">Lights Out Time Range</Text>
+					<Text description className="text-sm mb-2">
 						Time range when your mother will shut your computer off.
 					</Text>
 					<div className="grid grid-cols-2 gap-4">
@@ -96,7 +104,7 @@ export function Configuration() {
 					control={control}
 					render={({ field }) => (
 						<div>
-							<div className="flex gap-2 items-end relative">
+							<div className="flex gap-2 items-end relative sm:flex-row flex-col ">
 								<div className="flex-1">
 									<MultiCombobox
 										label="Blacklisted Processes"
@@ -121,7 +129,7 @@ export function Configuration() {
 											console.error("Error selecting file:", error);
 										}
 									}}
-									className="absolute top-0 right-0"
+									className="sm:absolute sm:top-0 sm:right-0 w-full sm:w-auto"
 								>
 									Browse
 								</Button>
@@ -153,12 +161,17 @@ export function Configuration() {
 						{...register("slipperEnabled")}
 						className="size-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
 					/>
-					<label
-						htmlFor="slipperEnabled"
-						className="text-sm/6 font-medium text-black dark:text-zinc-200 cursor-pointer"
-					>
-						Enable Slipper Mode
-					</label>
+					<div>
+						<label
+							htmlFor="slipperEnabled"
+							className="text-sm/6 font-medium text-black dark:text-zinc-200 cursor-pointer"
+						>
+							Enable Slipper Mode
+						</label>
+						<Text description className="text-sm">
+							Your mom will use her slipper to hit you when you disobey.
+						</Text>
+					</div>
 				</div>
 				{errors.slipperEnabled && (
 					<Text className="text-red-500 text-xs">{errors.slipperEnabled.message}</Text>

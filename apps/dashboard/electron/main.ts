@@ -234,4 +234,13 @@ ipcMain.handle("execute-urmom", async (_event, args: string[] = []) => {
 	}
 });
 
+ipcMain.handle("close-window", () => {
+	if (win) {
+		win.close();
+		return { success: true };
+	}
+
+	return { success: false, error: "No window to close" };
+});
+
 app.whenReady().then(createWindow);
