@@ -10,6 +10,8 @@ from .bubble import BubbleWidget
 from .popup import PopupWidget
 import signal
 
+from utils import log
+
 # Import SlipperOverlay directly so we can spawn it here
 from features.slipper.slipper import SlipperOverlay 
 

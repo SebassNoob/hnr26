@@ -8,8 +8,8 @@ from PIL import ImageGrab
 from dotenv import load_dotenv
 
 # --- Constants ---
-DEFAULT_MODEL = "groq/llama3-8b-8192" 
-CHECK_INTERVAL_SECONDS = 5 * 60  # 5 minutes
+DEFAULT_MODEL = "groq/meta-llama/llama-4-scout-17b-16e-instruct" 
+CHECK_INTERVAL_SECONDS =  5*60  # 5 minutes
 
 def _load_env():
     # Correctly locate the .env file at the project root
@@ -32,8 +32,10 @@ def take_screenshot():
     """Takes a screenshot and returns the path to a temporary file."""
     try:
         screenshot = ImageGrab.grab()
-        # Save to a temporary file
-        temp_path = os.path.join(os.getenv("TEMP", "/tmp"), "urmom_screenshot.jpg")
+        # --- FIX: Use a unique filename to avoid caching issues ---
+        temp_dir = os.getenv("TEMP", "/tmp")
+        temp_filename = f"urmom_screenshot_{int(time.time())}.jpg"
+        temp_path = os.path.join(temp_dir, temp_filename)
         screenshot.save(temp_path, "JPEG")
         return temp_path
     except Exception as e:
@@ -90,8 +92,9 @@ def analyze_activity(image_path, model=DEFAULT_MODEL):
             ],
             response_format={"type": "json_object"},
         )
-        print("WYD: Received analysis.")
+        print("WYD: Received analysis:")
         data = json.loads(response.choices[0].message.content)
+        print(data)
         return data
 
     except Exception as e:
