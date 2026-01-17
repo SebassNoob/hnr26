@@ -279,8 +279,8 @@ def main():
     # Calculate dimensions based on image size
     img_w, img_h = _mom_image.size
 
-    width = max(img_w, BUTTON_WIDTH)
-    height = img_h + BUTTON_HEIGHT + BUTTON_PAD_Y
+    width = img_w
+    height = img_h
 
     ex_style = (
         win32con.WS_EX_LAYERED | win32con.WS_EX_TOPMOST | win32con.WS_EX_TOOLWINDOW
