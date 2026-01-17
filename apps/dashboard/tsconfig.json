@@ -24,7 +24,7 @@
 		/* Path mapping */
 		"baseUrl": ".",
 		"paths": {
-			"@shared/ui": ["../../packages/ui/src"],
+			"@shared/ui": ["../../packages/ui/src"]
 		}
 	},
 	"include": ["src", "electron"],

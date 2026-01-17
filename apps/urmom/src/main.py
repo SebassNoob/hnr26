@@ -8,21 +8,25 @@ import os
 import json
 import multiprocessing
 import threading
-from utils import tray
+from utils import tray, Validation
+
 
 def cleanup_generator(procs):
     def cleanup():
         print("Shutting down everything...")
         for p in procs:
             if p.is_alive():
-                p.terminate() # Graceful request
-                p.join()      # Wait for it to actually stop
+                p.terminate()  # Graceful request
+                p.join()  # Wait for it to actually stop
         sys.exit(0)
+
     return cleanup
+
 
 def log(text):
     with open("log.txt", "a") as f:
         f.write(text + "\n")
+
 
 def main():
     multiprocessing.freeze_support()
@@ -51,16 +55,21 @@ def main():
         log("Error: argument is not valid json")
         return
 
-    lights_out_start = json_args["lightsOutStart"]
-    lights_out_end = json_args["lightsOutEnd"]
-    blacklisted_processes = json_args["blacklistedProcesses"]
-    
+    lights_out_start = Validation.validate_time_fmt(json_args["lightsOutStart"])
+    lights_out_end = Validation.validate_time_fmt(json_args["lightsOutEnd"])
+
+    blacklisted_processes = Validation.validate_non_empty_list(
+        json_args["blacklistedProcesses"]
+    )
+
     # --- FIX: IPC Queue ---
     # Create a queue for sending commands to the Mom process
     mom_command_queue = multiprocessing.Queue()
     # ----------------------
 
-    log(f"Parsed arguments: lights_out_start={lights_out_start}, lights_out_end={lights_out_end}")
+    log(
+        f"Parsed arguments: lights_out_start={lights_out_start}, lights_out_end={lights_out_end}"
+    )
 
     # Start processes
     procs = []
@@ -69,17 +78,15 @@ def main():
     )
     blacklist_checker.start()
 
-    if lights_out_start and lights_out_end:
-        lights_out_proc = multiprocessing.Process(
-            target=lights_out.main, 
-            # Pass the queue to lights_out so it can talk to Mom
-            args=(lights_out_start, lights_out_end, mom_command_queue) 
-        )
+    lights_out_proc = multiprocessing.Process(
+        target=lights_out.main,
+        # Pass the queue to lights_out so it can talk to Mom
+        args=(lights_out_start, lights_out_end, mom_command_queue),
+    )
 
     procs.extend([blacklist_checker, lights_out_proc])
     for p in procs:
         p.start()
-    print("Hello from urmom!")
 
     # Create and run the tray icon in a separate thread
     icon = tray.create_icon(cleanup_generator(procs))
@@ -88,7 +95,7 @@ def main():
 
     # Run Mom in the main process (blocking), passing the queue
     mom.main(mom_command_queue)
-    print("Hello from urmom!")
+
 
 if __name__ == "__main__":
     main()

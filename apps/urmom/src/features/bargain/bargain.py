@@ -54,7 +54,7 @@ def negotiate_time(user_excuse: str, model=DEFAULT_MODEL):
                 {"role": "user", "content": user_excuse},
             ],
             temperature=0.7,
-            response_format={ "type": "json_object" },
+            response_format={"type": "json_object"},
         )
         print("received response: ", response)
 
@@ -104,6 +104,7 @@ def main():
         print(f"       -> Slipper: {'YES' if result.get('slipper') else 'No'}")
 
     print("\n--- TEST FINISHED ---")
+
 
 if __name__ == "__main__":
     main()

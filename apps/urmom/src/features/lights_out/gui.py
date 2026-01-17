@@ -1,22 +1,33 @@
 import sys
 import time
 from PyQt6.QtWidgets import (
-    QApplication, QDialog, QVBoxLayout, QLabel, QPushButton, 
-    QLineEdit, QWidget, QStackedWidget, QHBoxLayout
+    QApplication,
+    QDialog,
+    QVBoxLayout,
+    QLabel,
+    QPushButton,
+    QLineEdit,
+    QWidget,
+    QStackedWidget,
+    QHBoxLayout,
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont
 
 from features.bargain import negotiate_time
 
+
 class BargainWorker(QThread):
     finished = pyqtSignal(dict)
+
     def __init__(self, excuse):
         super().__init__()
         self.excuse = excuse
+
     def run(self):
         result = negotiate_time(self.excuse)
         self.finished.emit(result)
+
 
 class LightsOutDialog(QDialog):
     def __init__(self, minutes_left, mom_queue=None):
@@ -59,10 +70,14 @@ class LightsOutDialog(QDialog):
         page = QWidget()
         layout = QVBoxLayout()
         page.setLayout(layout)
-        
-        lbl = QLabel(f"⚠️ Lights out in {self.minutes_left} minutes!\n\nStart winding down.")
+
+        lbl = QLabel(
+            f"⚠️ Lights out in {self.minutes_left} minutes!\n\nStart winding down."
+        )
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        font = QFont(); font.setBold(True); font.setPointSize(16)
+        font = QFont()
+        font.setBold(True)
+        font.setPointSize(16)
         lbl.setFont(font)
 
         btn_layout = QHBoxLayout()
@@ -106,7 +121,9 @@ class LightsOutDialog(QDialog):
         layout = QVBoxLayout()
         lbl = QLabel("Mom is thinking...")
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addStretch(); layout.addWidget(lbl); layout.addStretch()
+        layout.addStretch()
+        layout.addWidget(lbl)
+        layout.addStretch()
         page.setLayout(layout)
         self.stack.addWidget(page)
 
@@ -132,7 +149,8 @@ class LightsOutDialog(QDialog):
 
     def _submit_bargain(self):
         excuse = self.input_excuse.text().strip()
-        if not excuse: return
+        if not excuse:
+            return
         self.stack.setCurrentIndex(2)
         self.worker = BargainWorker(excuse)
         self.worker.finished.connect(self._handle_bargain_result)
@@ -141,31 +159,36 @@ class LightsOutDialog(QDialog):
     def _handle_bargain_result(self, result):
         self.added_minutes = result.get("minutes", 0)
         reply = result.get("reply", "...")
-        
+
         # 1. Trigger Physical Punishment (if applicable)
         if result.get("slipper", False):
             if self.mom_queue:
-                self.mom_queue.put({ "type": "throw_slipper" })
-            
+                self.mom_queue.put({"type": "throw_slipper"})
+
             # Note: We do NOT close the dialog here anymore.
             # We let it fall through to update the UI below so the user sees WHY.
-        
+
         # 2. Update UI
         self.lbl_reply.setText(f'Mom says:\n"{reply}"')
 
         if self.added_minutes > 0:
             self.lbl_added.setText(f"✅ PASSED: +{self.added_minutes} minutes added.")
-            self.lbl_added.setStyleSheet("color: green; font-weight: bold; font-size: 14px;")
+            self.lbl_added.setStyleSheet(
+                "color: green; font-weight: bold; font-size: 14px;"
+            )
         else:
             # If slipper was thrown, make the text redder/angrier
             if result.get("slipper", False):
-                 self.lbl_added.setText(f"💢 SLIPPER ATTACK! (+0 minutes)")
+                self.lbl_added.setText(f"💢 SLIPPER ATTACK! (+0 minutes)")
             else:
-                 self.lbl_added.setText(f"❌ DENIED: +0 minutes.")
-            
-            self.lbl_added.setStyleSheet("color: red; font-weight: bold; font-size: 14px;")
+                self.lbl_added.setText(f"❌ DENIED: +0 minutes.")
+
+            self.lbl_added.setStyleSheet(
+                "color: red; font-weight: bold; font-size: 14px;"
+            )
 
         self.stack.setCurrentIndex(3)
+
 
 def show_warning_dialog(minutes_left, mom_queue=None):
     app = QApplication.instance()

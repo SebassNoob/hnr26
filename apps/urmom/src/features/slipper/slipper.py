@@ -7,11 +7,12 @@ from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 from utils.paths import get_asset_path
 
+
 class SlipperOverlay(QWidget):
     def __init__(self, mom_instance):
         super().__init__()
         self.mom = mom_instance
-        
+
         # Overlay Setup
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint
@@ -24,10 +25,10 @@ class SlipperOverlay(QWidget):
         # Match Screen Geometry
         screen = self.mom.screen()
         self.setGeometry(screen.geometry())
-        
+
         self.center_x = self.width() // 2
         self.center_y = self.height() // 2
-        
+
         mom_rect = self.mom.geometry()
         self.launch_x = mom_rect.x() + (mom_rect.width() // 2)
         self.launch_y = mom_rect.y() + (mom_rect.height() // 3)
@@ -38,7 +39,7 @@ class SlipperOverlay(QWidget):
             "slipper_3": QPixmap(get_asset_path("slipper_3.png")),
             "slipper_splat": QPixmap(get_asset_path("slipper_4.png")),
         }
-        
+
         # --- Audio Setup ---
         self.audio_output_throw = QAudioOutput()
         self.player_throw = QMediaPlayer()
@@ -53,16 +54,16 @@ class SlipperOverlay(QWidget):
         self.audio_output_slap.setVolume(1.0)
         # -------------------
 
-        self.state = "WINDUP" 
+        self.state = "WINDUP"
         self.ticks = 0
         self.opacity = 1.0
         self.throw_progress = 0.0
         self.slipper_rotation = 0
-        
+
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_animation)
-        self.timer.start(16) 
-        
+        self.timer.start(16)
+
         self.mom.set_look("mom_slipper.png")
 
     def update_animation(self):
@@ -77,9 +78,9 @@ class SlipperOverlay(QWidget):
                 self.ticks = 0
 
         elif self.state == "THROWING":
-            self.throw_progress += 0.05 # Slightly faster
+            self.throw_progress += 0.05  # Slightly faster
             self.slipper_rotation += 45
-            
+
             if self.throw_progress >= 1.0:
                 self.state = "SPLAT"
                 self.ticks = 0
@@ -91,7 +92,7 @@ class SlipperOverlay(QWidget):
                 self.state = "FADE"
                 self.ticks = 0
                 self.mom.set_look("mom.png")
-        
+
         elif self.state == "FADE":
             self.opacity -= 0.05
             if self.opacity <= 0:
@@ -108,18 +109,22 @@ class SlipperOverlay(QWidget):
         if self.state == "THROWING":
             frame_idx = (self.ticks // 4) % 3
             pix = self.assets[f"slipper_{frame_idx + 1}"]
-            
-            cur_x = self.launch_x + (self.center_x - self.launch_x) * self.throw_progress
-            cur_y = self.launch_y + (self.center_y - self.launch_y) * self.throw_progress
-            
+
+            cur_x = (
+                self.launch_x + (self.center_x - self.launch_x) * self.throw_progress
+            )
+            cur_y = (
+                self.launch_y + (self.center_y - self.launch_y) * self.throw_progress
+            )
+
             scale = 0.5 + (2.5 * self.throw_progress)
-            
+
             t = QTransform()
             t.translate(cur_x, cur_y)
             t.rotate(self.slipper_rotation)
             t.scale(scale, scale)
-            t.translate(-pix.width()/2, -pix.height()/2)
-            
+            t.translate(-pix.width() / 2, -pix.height() / 2)
+
             painter.setTransform(t)
             painter.drawPixmap(0, 0, pix)
             painter.resetTransform()
@@ -127,12 +132,12 @@ class SlipperOverlay(QWidget):
         elif self.state in ["SPLAT", "FADE"]:
             pix = self.assets["slipper_splat"]
             scale = 3.0
-            
+
             t = QTransform()
             t.translate(self.center_x, self.center_y)
             t.scale(scale, scale)
-            t.translate(-pix.width()/2, -pix.height()/2)
-            
+            t.translate(-pix.width() / 2, -pix.height() / 2)
+
             painter.setTransform(t)
             painter.drawPixmap(0, 0, pix)
             painter.resetTransform()

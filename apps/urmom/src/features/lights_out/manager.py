@@ -2,6 +2,7 @@ import time
 from datetime import datetime, timedelta, time as dt_time
 from .gui import show_warning_dialog
 
+
 def parse_time_str(t_str):
     if t_str.startswith("T"):
         t_str = t_str[1:]
@@ -14,11 +15,13 @@ def parse_time_str(t_str):
             print(f"Error parsing time: {t_str}")
             return None
 
+
 def is_currently_in_blackout(now_time, start_time, end_time):
     if start_time < end_time:
         return start_time <= now_time <= end_time
     else:
         return now_time >= start_time or now_time <= end_time
+
 
 def get_next_occurrence(start_time):
     now = datetime.now()
@@ -26,6 +29,7 @@ def get_next_occurrence(start_time):
     if target < now:
         target += timedelta(days=1)
     return target
+
 
 # --- FIX: Accept queue ---
 def main(start_str, end_str, mom_queue=None):
@@ -48,7 +52,7 @@ def main(start_str, end_str, mom_queue=None):
         physically_in_window = is_currently_in_blackout(now.time(), t_start, t_end)
 
         if minutes_left <= 0:
-            if physically_in_window or minutes_left < -1: 
+            if physically_in_window or minutes_left < -1:
                 print("Time limit reached. SHUTDOWN.")
                 break
 
