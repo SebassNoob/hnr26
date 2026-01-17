@@ -44,7 +44,7 @@ def main():
     nag = json_args["nag"]
     slipper_enabled = json_args["slipperEnabled"]
     log(
-        f"Parsed arguments: lights_out_time={lights_out_time}, blacklisted_processes={blacklisted_processes}, nag={nag}, slipper_enabled={slipper_enabled}"
+        f"Parsed arguments: lights_out_start={lights_out_start}, lights_out_end={lights_out_end}, blacklisted={len(blacklisted_processes)}"
     )
     # Start processes
     # pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
@@ -58,10 +58,12 @@ def main():
     # )
     # blacklist_checker.start()
 
-    lights_out_proc = multiprocessing.Process(
-        target=lights_out.main, args=(lights_out_time,)
-    )
-    lights_out_proc.start()
+    if lights_out_start and lights_out_end:
+        lights_out_proc = multiprocessing.Process(
+            target=lights_out.main, 
+            args=(lights_out_start, lights_out_end)
+        )
+        lights_out_proc.start()
     mom.main()
     print("Hello from urmom!")
 
