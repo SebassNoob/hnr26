@@ -152,7 +152,7 @@ def main():
         alpha = src_img.split()[3]
         opaque_mask = alpha.point(lambda a: 255 if a == 255 else 0)
         bg.paste(src_img, (0, 0), opaque_mask)
-        
+
         if MOM_SCALE != 1.0:
             new_size = (
                 int(bg.width * MOM_SCALE),
@@ -169,13 +169,12 @@ def main():
 
     def wnd_proc(hwnd, msg, wparam, lparam):
         global _main_rect, _running
+
         def _start_drag_if_needed():
             global _dragging
             _dragging = True
             win32gui.ReleaseCapture()
-            win32gui.SendMessage(
-                hwnd, win32con.WM_NCLBUTTONDOWN, win32con.HTCAPTION, 0
-            )
+            win32gui.SendMessage(hwnd, win32con.WM_NCLBUTTONDOWN, win32con.HTCAPTION, 0)
 
         def _show_bubble():
             bubble_window.advance_phrase()
@@ -190,8 +189,12 @@ def main():
             else:
                 bx, by = _random_popup_position(bubble_w, bubble_h, _main_rect)
                 head_x = bx + (bubble_w // 2)
-            bx = max(SCREEN_EDGE_MARGIN, min(bx, screen_w - bubble_w - SCREEN_EDGE_MARGIN))
-            by = max(SCREEN_EDGE_MARGIN, min(by, screen_h - bubble_h - SCREEN_EDGE_MARGIN))
+            bx = max(
+                SCREEN_EDGE_MARGIN, min(bx, screen_w - bubble_w - SCREEN_EDGE_MARGIN)
+            )
+            by = max(
+                SCREEN_EDGE_MARGIN, min(by, screen_h - bubble_h - SCREEN_EDGE_MARGIN)
+            )
             tail_center_x = head_x - bx if _main_rect and _mom_image else None
             bubble_window.create_bubble(
                 hinstance, bx, by, TRANSPARENT_COLOR, tail_center_x=tail_center_x
@@ -214,8 +217,14 @@ def main():
                 head_y = _main_rect[1] + 20
                 bx = head_x - (bubble_w // 2)
                 by = head_y - bubble_h - 10
-                bx = max(SCREEN_EDGE_MARGIN, min(bx, screen_w - bubble_w - SCREEN_EDGE_MARGIN))
-                by = max(SCREEN_EDGE_MARGIN, min(by, screen_h - bubble_h - SCREEN_EDGE_MARGIN))
+                bx = max(
+                    SCREEN_EDGE_MARGIN,
+                    min(bx, screen_w - bubble_w - SCREEN_EDGE_MARGIN),
+                )
+                by = max(
+                    SCREEN_EDGE_MARGIN,
+                    min(by, screen_h - bubble_h - SCREEN_EDGE_MARGIN),
+                )
                 tail_center_x = head_x - bx
                 bubble_window.move_bubble(bx, by, tail_center_x=tail_center_x)
             return 0
@@ -270,8 +279,8 @@ def main():
     # Calculate dimensions based on image size
     img_w, img_h = _mom_image.size
 
-    width = max(img_w, BUTTON_WIDTH)
-    height = img_h + BUTTON_HEIGHT + BUTTON_PAD_Y
+    width = img_w
+    height = img_h
 
     ex_style = (
         win32con.WS_EX_LAYERED | win32con.WS_EX_TOPMOST | win32con.WS_EX_TOOLWINDOW
