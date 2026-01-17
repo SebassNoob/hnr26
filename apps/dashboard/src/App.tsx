@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router";
+import { MemoryRouter, Routes, Route } from "react-router";
 import { About, Configuration, NotFound } from "./app/index";
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -24,13 +24,13 @@ const routes = {
 
 function App() {
 	return (
-		<BrowserRouter>
+		<MemoryRouter initialEntries={["/"]} initialIndex={0}>
 			<Routes>
 				{Object.entries(routes).map(([path, element]) => (
 					<Route key={path} path={path} element={<Layout>{element}</Layout>} />
 				))}
 			</Routes>
-		</BrowserRouter>
+		</MemoryRouter>
 	);
 }
 

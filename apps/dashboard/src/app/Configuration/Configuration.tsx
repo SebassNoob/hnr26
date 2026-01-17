@@ -2,7 +2,7 @@ import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { TimePicker, Button, Text, MultiCombobox } from "@shared/ui";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 // Time format regex: HH:mm
 const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
@@ -39,27 +39,34 @@ export function Configuration() {
 		loadConfig();
 	}, []);
 
-	const loadConfig = async () => {
+	const loadConfig = useEffectEvent(async () => {
 		try {
 			const result = await window.ipcRenderer.invoke("load-config");
 			if (result.success) {
 				reset(result.data);
-				console.log("Config loaded:", result.data);
+				console.info("Config loaded:", result.data);
 			}
 		} catch (error) {
 			console.error("Error loading config:", error);
 		}
-	};
+	})
 
 	const onSubmit: SubmitHandler<ConfigFormData> = async (data) => {
-		console.log("Form submitted:", data);
+		
 		try {
 			const result = await window.ipcRenderer.invoke("save-config", data);
-			if (result.success) {
-				alert(`Configuration saved to ${result.path}`);
-			} else {
+			if (!result.success) {
+				
 				alert(`Failed to save configuration: ${result.error}`);
+        return;
 			}
+
+      // launch with new config
+
+      const execResult = await window.ipcRenderer.invoke("execute-urmom", [JSON.stringify(data)]);
+      if (!execResult.success) {
+        alert(`Failed to execute UrMom: ${execResult.stderr}`);
+      }
 		} catch (error) {
 			console.error("Error saving config:", error);
 			alert("Failed to save configuration");
@@ -121,7 +128,7 @@ export function Configuration() {
 											const filePath = await window.ipcRenderer.invoke("select-file");
 											if (filePath) {
 												field.onChange([...field.value, filePath]);
-												console.log("Selected file:", filePath);
+												console.info("Selected file:", filePath);
 											}
 										} catch (error) {
 											console.error("Error selecting file:", error);
