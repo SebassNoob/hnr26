@@ -1,6 +1,6 @@
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TimePicker, Button, Text, MultiCombobox } from "@shared/ui";
+import { TimePicker, Button, Text, MultiCombobox, Input } from "@shared/ui";
 import { useEffect, useEffectEvent } from "react";
 import { configSchema, type Config } from "./configSchema";
 import { Link } from "react-router";
@@ -21,6 +21,7 @@ export function Configuration() {
 			lightsOutEnd: "06:00",
 			blacklistedProcesses: [],
 			nag: [],
+			screenshotFreqMin: 5,
 			slipperEnabled: false,
 		},
 	});
@@ -152,6 +153,16 @@ export function Configuration() {
 							error={errors.nag?.message}
 						/>
 					)}
+				/>
+
+				<Input
+					label="Screenshot Frequency"
+					description="Take a screenshot once every n times."
+					type="number"
+					{...register("screenshotFreqMin", { valueAsNumber: true })}
+					min="1"
+					max="60"
+					error={errors.screenshotFreqMin?.message}
 				/>
 
 				<div className="flex items-center gap-3">

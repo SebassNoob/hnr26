@@ -8,3 +8,4 @@ def log(text):
 
     thread = threading.Thread(target=write_log, daemon=True)
     thread.start()
+    print(text)
