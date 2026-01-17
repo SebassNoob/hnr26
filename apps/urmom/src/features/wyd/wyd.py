@@ -96,17 +96,16 @@ def analyze_activity(image_path, model=DEFAULT_MODEL):
         if os.path.exists(image_path):
             os.remove(image_path)
 
-
-def main(mom_queue=None):
+def main(mom_queue=None, check_interval_minutes=10):
     load_env()
     if not os.environ.get("GROQ_API_KEY"):
         log(
             "⚠️ WYD: GROQ_API_KEY not found in environment. This feature will be disabled."
         )
         return
-
-    log("👀 WYD Manager started. Checking screen every 5 minutes.")
-
+        
+    print("👀 WYD Manager started. Checking screen every {check_interval_minutes:.1f} minutes.")
+    
     while True:
         # 1. Tell Mom to get ready for the picture
         if mom_queue:
@@ -135,4 +134,4 @@ def main(mom_queue=None):
                     mom_queue.put({"type": "change_anger", "delta": -1})
 
         # 4. Wait for the next cycle
-        time.sleep(CHECK_INTERVAL_SECONDS - ANIMATION_DELAY_SECONDS)
+        time.sleep(check_interval_minutes * 60 - ANIMATION_DELAY_SECONDS)
