@@ -5,7 +5,8 @@
   "asar": true,
   "productName": "urmom-launcher",
   "directories": {
-    "output": "release/${version}"
+    "output": "release/${version}",
+    "buildResources": "public"
   },
   "files": [
     "dist",
@@ -18,12 +19,14 @@
     }
   ],
   "mac": {
+    "icon": "mom.png",
     "target": [
       "dmg"
     ],
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "win": {
+    "icon": "mom.png",
     "target": [
       {
         "target": "nsis",
@@ -41,6 +44,7 @@
     "deleteAppDataOnUninstall": false
   },
   "linux": {
+    "icon": "mom.png",
     "target": [
       "AppImage"
     ],

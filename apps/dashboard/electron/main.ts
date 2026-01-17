@@ -188,46 +188,19 @@ ipcMain.handle("execute-urmom", async (_event, args: string[] = []) => {
 			};
 		}
 
-		// Execute the binary
+		// Execute the binary (fire-and-forget so UI can close immediately)
 		const child = spawn(urmomPath, args, {
-			detached: false,
-			stdio: ["ignore", "pipe", "pipe"],
+			detached: true,
+			stdio: "ignore",
 		});
 
-		let stdout = "";
-		let stderr = "";
+		child.unref();
 
-		child.stdout?.on("data", (data) => {
-			stdout += data.toString();
-		});
-
-		child.stderr?.on("data", (data) => {
-			stderr += data.toString();
-		});
-
-		// Return immediately with the process info
-		// You can also wait for the process to complete if needed
-		return new Promise((resolve) => {
-			child.on("close", (code) => {
-				console.info(`urmom.exe exited with code ${code}`);
-				resolve({
-					success: code === 0,
-					code,
-					stdout,
-					stderr,
-					path: urmomPath,
-				});
-			});
-
-			child.on("error", (error) => {
-				console.error("Error executing urmom.exe:", error);
-				resolve({
-					success: false,
-					error: String(error),
-					path: urmomPath,
-				});
-			});
-		});
+		return {
+			success: true,
+			pid: child.pid,
+			path: urmomPath,
+		};
 	} catch (error) {
 		console.error("Error in execute-urmom handler:", error);
 		return { success: false, error: String(error) };
