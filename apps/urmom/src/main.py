@@ -54,7 +54,7 @@ def main():
     lights_out_start = Validation.validate_time_fmt(json_args["lightsOutStart"])
     lights_out_end = Validation.validate_time_fmt(json_args["lightsOutEnd"])
 
-    nagging_messages = json_args.get("naggingMessages", [])
+    nagging_messages = json_args.get("nag", [])
     blacklisted_processes = Validation.validate_non_empty_list(
         json_args["blacklistedProcesses"]
     )
