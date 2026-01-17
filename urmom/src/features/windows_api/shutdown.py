@@ -1,6 +1,11 @@
 import win32api
 import win32con
 import win32security
+import datetime
+
+def check_for_lights_out(lights_out_time):
+    current_time = datetime.datetime.now().time()
+    return current_time >= lights_out_time
 
 def shutdown_computer():
     shutdown_message = "EH WHAT TIME ALREADY? GO TO SLEEP LA TOMORROW YOU CANNOT WAKE UP HOW. I GIVE YOU 10 SECONDS"
