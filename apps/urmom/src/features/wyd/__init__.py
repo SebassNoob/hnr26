@@ -1,0 +1,1 @@
+from .wyd import main

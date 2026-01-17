@@ -4,28 +4,6 @@ from litellm import completion
 
 DEFAULT_MODEL = "huggingface/together/meta-llama/Llama-3.2-3B-Instruct"
 
-
-def _load_env():
-    env_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..", ".env")
-    )
-    if not os.path.exists(env_path):
-        return
-    with open(env_path, "r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            key, value = line.split("=", 1)
-            key = key.strip()
-            value = value.strip().strip('"').strip("'")
-            if key and key not in os.environ:
-                os.environ[key] = value
-
-
-_load_env()
-
-
 def negotiate_time(user_excuse: str, model=DEFAULT_MODEL):
     system_prompt = """
     You are a strict Asian mother. Your child wants more computer time.
