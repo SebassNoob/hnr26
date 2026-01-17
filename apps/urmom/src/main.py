@@ -44,20 +44,13 @@ def main():
     nag = json_args["nag"]
     slipper_enabled = json_args["slipperEnabled"]
     log(
-        f"Parsed arguments: lights_out_start={lights_out_start}, lights_out_end={lights_out_end}, blacklisted={len(blacklisted_processes)}"
+        f"Parsed arguments: lights_out_start={lights_out_start}, lights_out_end={lights_out_end}, blacklisted={blacklisted_processes}"
     )
     # Start processes
-    # pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
-    # pyqt6_proc.start()
-    # lights_out_checker = multiprocessing.Process(
-    #     target=shutdown.main, args=(lights_out_time,)
-    # )
-    # lights_out_checker.start()
-    # blacklist_checker = multiprocessing.Process(
-    #     target=blacklist.main, args=(blacklisted_processes,)
-    # )
-    # blacklist_checker.start()
-
+    blacklist_checker = multiprocessing.Process(
+        target=blacklist.main, args=(blacklisted_processes, dev_mode)
+    )
+    blacklist_checker.start()
     if lights_out_start and lights_out_end:
         lights_out_proc = multiprocessing.Process(
             target=lights_out.main, args=(lights_out_start, lights_out_end)
