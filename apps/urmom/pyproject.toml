@@ -12,6 +12,7 @@ dependencies = [
     "pyqt6>=6.10.2",
     "pillow>=12.1.0",
     "litellm>=1.80.17",
+    "pystray>=0.19.5",
 ]
 
 [project.optional-dependencies]
