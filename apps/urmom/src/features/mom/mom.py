@@ -6,23 +6,25 @@ import win32gui
 from PIL import Image, ImageWin
 
 from . import popup_window
+from . import bubble_window
 from . import timer_loop
 
 
 TRANSPARENT_COLOR = 0x00FF00FF  # BGR magenta (R=255, B=255)
 IMAGE_FILENAME = "mom.png"
-BUTTON_ID = 1001
-POPUP_INTERVAL_MS = 5000
-BUTTON_WIDTH = 70
-BUTTON_HEIGHT = 28
-BUTTON_PAD_Y = 8
+ICON_FILENAME = "mom.ico"
+MOM_SCALE = 1.4
+POPUP_INTERVAL_MS = 5000 * 60 * 3
 TRAY_ICON_UID = 1
 TRAY_CALLBACK_MSG = win32con.WM_USER + 1
 TRAY_EXIT_ID = 2001
+SCREEN_EDGE_MARGIN = 16
 _last_popup_pos = None
 _mom_image = None
 _main_rect = None
 _running = True
+_mouse_down_pos = None
+_dragging = False
 
 
 def _paint(hwnd):
@@ -81,7 +83,22 @@ def _random_popup_position(width, height, avoid_rect=None):
 
 
 def _add_tray_icon(hwnd):
-    icon = win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
+    script_dir = os.path.dirname(__file__)
+    icon_path = os.path.join(script_dir, ICON_FILENAME)
+    if os.path.exists(icon_path):
+        try:
+            icon = win32gui.LoadImage(
+                0,
+                icon_path,
+                win32con.IMAGE_ICON,
+                0,
+                0,
+                win32con.LR_LOADFROMFILE | win32con.LR_DEFAULTSIZE,
+            )
+        except win32gui.error:
+            icon = win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
+    else:
+        icon = win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
     win32gui.Shell_NotifyIcon(
         win32gui.NIM_ADD,
         (
@@ -130,11 +147,18 @@ def main():
         # 2. Create a solid background with the transparent color (Magenta)
         #    PIL RGB for Magenta is (255, 0, 255)
         bg = Image.new("RGB", src_img.size, (255, 0, 255))
+
+        # 3. Paste only fully-opaque pixels to avoid magenta fringes at edges.
+        alpha = src_img.split()[3]
+        opaque_mask = alpha.point(lambda a: 255 if a == 255 else 0)
+        bg.paste(src_img, (0, 0), opaque_mask)
         
-        # 3. Paste the PNG onto the Magenta background using the alpha channel as a mask
-        #    This fills transparent areas with Magenta, which Windows will then remove.
-        bg.paste(src_img, (0, 0), src_img)
-        
+        if MOM_SCALE != 1.0:
+            new_size = (
+                int(bg.width * MOM_SCALE),
+                int(bg.height * MOM_SCALE),
+            )
+            bg = bg.resize(new_size, Image.Resampling.LANCZOS)
         _mom_image = bg
     else:
         # Fallback if image missing: create a small red box
@@ -145,6 +169,34 @@ def main():
 
     def wnd_proc(hwnd, msg, wparam, lparam):
         global _main_rect, _running
+        def _start_drag_if_needed():
+            global _dragging
+            _dragging = True
+            win32gui.ReleaseCapture()
+            win32gui.SendMessage(
+                hwnd, win32con.WM_NCLBUTTONDOWN, win32con.HTCAPTION, 0
+            )
+
+        def _show_bubble():
+            bubble_window.advance_phrase()
+            bubble_w, bubble_h = bubble_window.get_bubble_size()
+            screen_w = win32api.GetSystemMetrics(win32con.SM_CXSCREEN)
+            screen_h = win32api.GetSystemMetrics(win32con.SM_CYSCREEN)
+            if _main_rect and _mom_image:
+                head_x = _main_rect[0] + (_mom_image.width // 2)
+                head_y = _main_rect[1] + 20
+                bx = head_x - (bubble_w // 2)
+                by = head_y - bubble_h - 10
+            else:
+                bx, by = _random_popup_position(bubble_w, bubble_h, _main_rect)
+                head_x = bx + (bubble_w // 2)
+            bx = max(SCREEN_EDGE_MARGIN, min(bx, screen_w - bubble_w - SCREEN_EDGE_MARGIN))
+            by = max(SCREEN_EDGE_MARGIN, min(by, screen_h - bubble_h - SCREEN_EDGE_MARGIN))
+            tail_center_x = head_x - bx if _main_rect and _mom_image else None
+            bubble_window.create_bubble(
+                hinstance, bx, by, TRANSPARENT_COLOR, tail_center_x=tail_center_x
+            )
+
         if msg == win32con.WM_PAINT:
             _paint(hwnd)
             return 0
@@ -154,10 +206,40 @@ def main():
             return 0
         if msg == win32con.WM_MOVE:
             _main_rect = win32gui.GetWindowRect(hwnd)
+            if _mom_image:
+                bubble_w, bubble_h = bubble_window.get_bubble_size()
+                screen_w = win32api.GetSystemMetrics(win32con.SM_CXSCREEN)
+                screen_h = win32api.GetSystemMetrics(win32con.SM_CYSCREEN)
+                head_x = _main_rect[0] + (_mom_image.width // 2)
+                head_y = _main_rect[1] + 20
+                bx = head_x - (bubble_w // 2)
+                by = head_y - bubble_h - 10
+                bx = max(SCREEN_EDGE_MARGIN, min(bx, screen_w - bubble_w - SCREEN_EDGE_MARGIN))
+                by = max(SCREEN_EDGE_MARGIN, min(by, screen_h - bubble_h - SCREEN_EDGE_MARGIN))
+                tail_center_x = head_x - bx
+                bubble_window.move_bubble(bx, by, tail_center_x=tail_center_x)
             return 0
         if msg == win32con.WM_LBUTTONDOWN:
-            win32gui.ReleaseCapture()
-            win32gui.SendMessage(hwnd, win32con.WM_NCLBUTTONDOWN, win32con.HTCAPTION, 0)
+            global _mouse_down_pos, _dragging
+            _mouse_down_pos = (win32api.LOWORD(lparam), win32api.HIWORD(lparam))
+            _dragging = False
+            win32gui.SetCapture(hwnd)
+            return 0
+        if msg == win32con.WM_MOUSEMOVE:
+            if wparam & win32con.MK_LBUTTON and _mouse_down_pos and not _dragging:
+                x = win32api.LOWORD(lparam)
+                y = win32api.HIWORD(lparam)
+                dx = abs(x - _mouse_down_pos[0])
+                dy = abs(y - _mouse_down_pos[1])
+                if dx > 3 or dy > 3:
+                    _start_drag_if_needed()
+            return 0
+        if msg == win32con.WM_LBUTTONUP:
+            if _mouse_down_pos:
+                win32gui.ReleaseCapture()
+                if not _dragging:
+                    _show_bubble()
+                _mouse_down_pos = None
             return 0
         if msg == win32con.WM_RBUTTONDOWN:
             win32gui.DestroyWindow(hwnd)
@@ -188,13 +270,13 @@ def main():
     # Calculate dimensions based on image size
     img_w, img_h = _mom_image.size
     
-    width = max(img_w, BUTTON_WIDTH)
-    height = img_h + BUTTON_HEIGHT + BUTTON_PAD_Y
+    width = img_w
+    height = img_h
     
     ex_style = win32con.WS_EX_LAYERED | win32con.WS_EX_TOPMOST | win32con.WS_EX_TOOLWINDOW
     style = win32con.WS_POPUP
-    x = (win32api.GetSystemMetrics(win32con.SM_CXSCREEN) - width) // 2
-    y = (win32api.GetSystemMetrics(win32con.SM_CYSCREEN) - height) // 2
+    x = win32api.GetSystemMetrics(win32con.SM_CXSCREEN) - width - 20
+    y = win32api.GetSystemMetrics(win32con.SM_CYSCREEN) - height - 20
 
     hwnd = win32gui.CreateWindowEx(
         ex_style,
@@ -207,22 +289,6 @@ def main():
         height,
         0,
         0,
-        hinstance,
-        None,
-    )
-
-    button_x = (width - BUTTON_WIDTH) // 2
-    button_y = img_h + (BUTTON_PAD_Y // 2)
-    win32gui.CreateWindow(
-        "BUTTON",
-        "Hi",
-        win32con.WS_CHILD | win32con.WS_VISIBLE | win32con.BS_PUSHBUTTON,
-        button_x,
-        button_y,
-        BUTTON_WIDTH,
-        BUTTON_HEIGHT,
-        hwnd,
-        BUTTON_ID,
         hinstance,
         None,
     )
