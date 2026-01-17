@@ -1,1 +1,0 @@
-from .mom import main
