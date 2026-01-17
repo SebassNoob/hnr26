@@ -1,72 +1,35 @@
+import os
 import random
 import win32api
 import win32con
 import win32gui
+from PIL import Image, ImageWin
 
 from . import popup_window
 from . import timer_loop
 
 
-TRANSPARENT_COLOR = 0x00FF00FF  # BGR magenta
-TEXT = "👩"
-FONT_NAME = "Consolas"
-TEXT_FONT_HEIGHT = 36
-TEXT_FONT_WEIGHT = win32con.FW_BOLD
-TEXT_PAD_X = 12
-TEXT_PAD_Y = 10
+TRANSPARENT_COLOR = 0x00FF00FF  # BGR magenta (R=255, B=255)
+IMAGE_FILENAME = "mom.png"
+BUTTON_ID = 1001
 POPUP_INTERVAL_MS = 5000
+BUTTON_WIDTH = 70
+BUTTON_HEIGHT = 28
+BUTTON_PAD_Y = 8
 _last_popup_pos = None
-_text_rect = None
+_mom_image = None
 _main_rect = None
 _running = True
-
-
-def _create_logfont(height, weight, face_name):
-    logfont = win32gui.LOGFONT()
-    logfont.lfHeight = height
-    logfont.lfWeight = weight
-    logfont.lfCharSet = win32con.DEFAULT_CHARSET
-    logfont.lfOutPrecision = win32con.OUT_DEFAULT_PRECIS
-    logfont.lfClipPrecision = win32con.CLIP_DEFAULT_PRECIS
-    logfont.lfQuality = win32con.DEFAULT_QUALITY
-    logfont.lfPitchAndFamily = win32con.DEFAULT_PITCH | win32con.FF_DONTCARE
-    logfont.lfFaceName = face_name
-    return logfont
-
-
-def _measure_text(text, height, weight, face_name):
-    hdc = win32gui.GetDC(0)
-    font = win32gui.CreateFontIndirect(_create_logfont(height, weight, face_name))
-    old_font = win32gui.SelectObject(hdc, font)
-    try:
-        return win32gui.GetTextExtentPoint32(hdc, text)
-    finally:
-        win32gui.SelectObject(hdc, old_font)
-        win32gui.DeleteObject(font)
-        win32gui.ReleaseDC(0, hdc)
 
 
 def _paint(hwnd):
     hdc, ps = win32gui.BeginPaint(hwnd)
     try:
-        rect = _text_rect or win32gui.GetClientRect(hwnd)
-        win32gui.SetBkMode(hdc, win32con.TRANSPARENT)
-        win32gui.SetTextColor(hdc, win32api.RGB(0, 0, 0))
-        font = win32gui.CreateFontIndirect(
-            _create_logfont(TEXT_FONT_HEIGHT, TEXT_FONT_WEIGHT, FONT_NAME)
-        )
-        old_font = win32gui.SelectObject(hdc, font)
-        try:
-            win32gui.DrawText(
-                hdc,
-                TEXT,
-                -1,
-                rect,
-                win32con.DT_CENTER | win32con.DT_VCENTER | win32con.DT_SINGLELINE,
-            )
-        finally:
-            win32gui.SelectObject(hdc, old_font)
-            win32gui.DeleteObject(font)
+        if _mom_image:
+            # Create a Device Independent Bitmap (DIB) from the loaded image
+            dib = ImageWin.Dib(_mom_image)
+            # Draw the image at 0,0
+            dib.draw(hdc, (0, 0, _mom_image.width, _mom_image.height))
     finally:
         win32gui.EndPaint(hwnd, ps)
 
@@ -115,7 +78,30 @@ def _random_popup_position(width, height, avoid_rect=None):
 
 
 def main():
-    global _text_rect, _main_rect, _running
+    global _mom_image, _main_rect, _running
+    
+    # Load image before creating window
+    script_dir = os.path.dirname(__file__)
+    image_path = os.path.join(script_dir, IMAGE_FILENAME)
+    
+    if os.path.exists(image_path):
+        # 1. Open image and ensure it has Alpha channel
+        src_img = Image.open(image_path).convert("RGBA")
+        
+        # 2. Create a solid background with the transparent color (Magenta)
+        #    PIL RGB for Magenta is (255, 0, 255)
+        bg = Image.new("RGB", src_img.size, (255, 0, 255))
+        
+        # 3. Paste the PNG onto the Magenta background using the alpha channel as a mask
+        #    This fills transparent areas with Magenta, which Windows will then remove.
+        bg.paste(src_img, (0, 0), src_img)
+        
+        _mom_image = bg
+    else:
+        # Fallback if image missing: create a small red box
+        _mom_image = Image.new("RGB", (100, 100), (255, 0, 0))
+        print(f"Warning: {IMAGE_FILENAME} not found in {script_dir}")
+
     class_name = "TransparentTextWindow"
 
     def wnd_proc(hwnd, msg, wparam, lparam):
@@ -151,13 +137,12 @@ def main():
     wnd_class.hbrBackground = win32gui.CreateSolidBrush(TRANSPARENT_COLOR)
     win32gui.RegisterClass(wnd_class)
 
-    text_w, text_h = _measure_text(TEXT, TEXT_FONT_HEIGHT, TEXT_FONT_WEIGHT, FONT_NAME)
-    text_area_w = text_w + (TEXT_PAD_X * 2)
-    text_area_h = text_h + (TEXT_PAD_Y * 2)
-    width = text_area_w
-    height = text_area_h
-    _text_rect = (0, 0, width, text_area_h)
-
+    # Calculate dimensions based on image size
+    img_w, img_h = _mom_image.size
+    
+    width = max(img_w, BUTTON_WIDTH)
+    height = img_h + BUTTON_HEIGHT + BUTTON_PAD_Y
+    
     ex_style = win32con.WS_EX_LAYERED | win32con.WS_EX_TOPMOST | win32con.WS_EX_TOOLWINDOW
     style = win32con.WS_POPUP
     x = (win32api.GetSystemMetrics(win32con.SM_CXSCREEN) - width) // 2
@@ -174,6 +159,22 @@ def main():
         height,
         0,
         0,
+        hinstance,
+        None,
+    )
+
+    button_x = (width - BUTTON_WIDTH) // 2
+    button_y = img_h + (BUTTON_PAD_Y // 2)
+    win32gui.CreateWindow(
+        "BUTTON",
+        "Hi",
+        win32con.WS_CHILD | win32con.WS_VISIBLE | win32con.BS_PUSHBUTTON,
+        button_x,
+        button_y,
+        BUTTON_WIDTH,
+        BUTTON_HEIGHT,
+        hwnd,
+        BUTTON_ID,
         hinstance,
         None,
     )
