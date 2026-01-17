@@ -58,13 +58,23 @@ def main():
     # )
     # blacklist_checker.start()
 
-    if lights_out_start and lights_out_end:
-        lights_out_proc = multiprocessing.Process(
-            target=lights_out.main, args=(lights_out_start, lights_out_end)
-        )
-        lights_out_proc.start()
-    mom.main()
-    print("Hello from urmom!")
+    lights_out_proc = multiprocessing.Process(
+        target=lights_out.main,
+        # Pass the queue to lights_out so it can talk to Mom
+        args=(lights_out_start, lights_out_end, dev_mode, mom_command_queue),
+    )
+
+    procs.extend([blacklist_checker, lights_out_proc])
+    for p in procs:
+        p.start()
+
+    # Create and run the tray icon in a separate thread
+    icon = tray.create_icon(cleanup_generator(procs))
+    icon_thread = threading.Thread(target=icon.run)
+    icon_thread.start()
+
+    # Run Mom in the main process (blocking), passing the queue
+    mom.main(mom_command_queue)
 
 
 if __name__ == "__main__":

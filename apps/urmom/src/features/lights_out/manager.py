@@ -1,5 +1,6 @@
 import time
 from datetime import datetime, timedelta, time as dt_time
+from ..windows_api.shutdown import shutdown_computer
 from .gui import show_warning_dialog
 
 
@@ -51,7 +52,8 @@ def get_next_occurrence(start_time):
     return target
 
 
-def main(start_str, end_str):
+# --- FIX: Accept queue ---
+def main(start_str, end_str, dev_mode, mom_queue=None):
     print(f"Lights Out Manager started. Window: {start_str} to {end_str}")
 
     t_start = parse_time_str(start_str)
@@ -89,16 +91,8 @@ def main(start_str, end_str):
 
         # CONDITION: Shutdown
         if minutes_left <= 0:
-            if physically_in_window:
-                print("In blackout window. SHUTDOWN.")
-                break
-            else:
-                # We reached the count down, but strictly speaking we aren't in the
-                # blackout window yet (e.g., target was set for tomorrow).
-                # This ensures we don't shutdown if target_time is tomorrow.
-                # However, minutes_left < 0 implies we passed the target.
-                # If target was "Tomorrow 23:00" and now is "Today 22:00", minutes_left is positive.
-                # If minutes_left is negative, we passed it.
+            if physically_in_window or minutes_left < -1:
+                shutdown_computer(dev_mode)
                 print("Time limit reached. SHUTDOWN.")
                 break
 
