@@ -5,7 +5,6 @@ import sys
 import json
 import multiprocessing
 
-
 def main():
     if len(sys.argv) != 2:
         print("Error: expected only one json string as argument")
