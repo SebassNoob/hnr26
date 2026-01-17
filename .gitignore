@@ -50,3 +50,5 @@ yarn-error.log*
 .vite
 
 uv.lock
+dist-electron/
+release/
