@@ -1,5 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import sys
+
+# Check for dev build flag
+dev_build = '--dev' in sys.argv
 
 a = Analysis(
     ['src/main.py'],
@@ -23,13 +27,13 @@ exe = EXE(
     a.datas,
     [],
     name='urmom',
-    debug=False,
+    debug=dev_build,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=dev_build,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

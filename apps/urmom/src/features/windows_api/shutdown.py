@@ -13,7 +13,7 @@ def check_for_lights_out(lights_out_time):
 
 
 def shutdown_computer():
-    shutdown_message = "EH WHAT TIME ALREADY? GO TO SLEEP LA TOMORROW YOU CANNOT WAKE UP HOW. I GIVE YOU 10 SECONDS"
+    shutdown_message = "EH WHAT TIME ALREADY? GO TO SLEEP LA TOMORROW YOU CANNOT WAKE UP HOW. I GIVE YOU 30 SECONDS"
 
     # Check permissions
     flags = win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY
@@ -26,7 +26,7 @@ def shutdown_computer():
         token, 0, [(privilege_id, win32security.SE_PRIVILEGE_ENABLED)]
     )
     # Shutdown
-    win32api.InitiateSystemShutdown(None, shutdown_message, 10, False, False)
+    win32api.InitiateSystemShutdown(None, shutdown_message, 30, False, False)
 
 
 def main(lights_out_time):
