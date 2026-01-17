@@ -1,0 +1,1 @@
+export const allowedExecutableExtensions = ["exe", "bat", "cmd", "sh", "app", "jar", "py", "pl", "rb", "com", "scr", "pif", "cpl", "msc"];

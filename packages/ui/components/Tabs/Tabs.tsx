@@ -29,7 +29,7 @@ export function Tabs({
 								"focus:ring-1 cursor-pointer whitespace-nowrap",
 								selected
 									? "ring-1 text-pink-600 dark:text-pink-400 ring-pink-400/30"
-									: "hover:bg-white/[0.12] dark:hover:bg-neutral-800/[0.12] hover:text-pink-700 dark:hover:text-pink-300 text-neutral-900 dark:text-neutral-100",
+									: "hover:bg-white/12 dark:hover:bg-neutral-800/12 hover:text-pink-700 dark:hover:text-pink-300 text-neutral-900 dark:text-neutral-100",
 								tabClassName,
 							)
 						}
