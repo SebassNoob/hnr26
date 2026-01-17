@@ -22,12 +22,13 @@ def terminate_blacklisted_processes(blacklisted_processes: list[int]) -> None:
             continue
 
 
-def main(blacklisted_processes: list[str]) -> None:
-    while True:
-        running_blacklisted = check_for_blacklisted_process(blacklisted_processes)
-        if running_blacklisted != []:
-            terminate_blacklisted_processes(blacklisted_processes)
-        time.sleep(60)
+def main(blacklisted_processes: list[str], dev_mode) -> None:
+    if dev_mode != '1':
+        while True:
+            running_blacklisted = check_for_blacklisted_process(blacklisted_processes)
+            if running_blacklisted != []:
+                terminate_blacklisted_processes(blacklisted_processes)
+            time.sleep(60)
 
 
 if __name__ == "__main__":

@@ -13,12 +13,19 @@ def log(text):
         f.write(text + "\n")
 
 def main():
+    multiprocessing.freeze_support()
     if len(sys.argv) != 2:
         log("Error: expected only one json string as argument")
         log(str(sys.argv))
         return
     # Check if dev mode is enabled
-    dev_mode = os.environ.get('dev')
+    dev_mode = None
+    if hasattr(sys, '_MEIPASS'):  # Running from PyInstaller bundle
+        marker_path = os.path.join(sys._MEIPASS, 'dev_mode.txt')
+        dev_mode = '1' if os.path.exists(marker_path) else '0'
+    else:  # Running directly (e.g., in development)
+        dev_mode = os.environ.get('dev', '0')
+    
     if dev_mode == '1':
         log("Running in dev mode")
     else:
@@ -35,7 +42,6 @@ def main():
     slipper_enabled = json_args["slipperEnabled"]
 
     # Start processes
-    multiprocessing.freeze_support()
     # pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
     # pyqt6_proc.start()
     # lights_out_checker = multiprocessing.Process(

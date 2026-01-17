@@ -29,10 +29,11 @@ def shutdown_computer():
     win32api.InitiateSystemShutdown(None, shutdown_message, 30, False, False)
 
 
-def main(lights_out_time):
+def main(lights_out_time, dev_mode):
     while True:
         if check_for_lights_out(lights_out_time):
-            shutdown_computer()
+            if dev_mode !='1':
+                shutdown_computer()
         time.sleep(60)
 
 
