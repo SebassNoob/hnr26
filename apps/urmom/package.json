@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev:simple": "uv run src/main.py",
-    "build": "uvx pyinstaller build.spec --clean",
-    "dev": "uvx pyinstaller build.spec --clean --dev",
+    "build": "uv run pyinstaller build.spec --clean",
+    "dev": "uv run pyinstaller build.spec --clean --dev",
     "format": "uv format",
     "clean": "rm -rf dist/ build/ __pycache__/"
   }
