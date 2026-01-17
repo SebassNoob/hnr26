@@ -2,7 +2,7 @@ import sys
 import os
 import random
 import queue  # For the Empty exception
-from PyQt6.QtWidgets import QApplication, QWidget, QSystemTrayIcon, QMenu
+from PyQt6.QtWidgets import QApplication, QWidget, QMenu
 from PyQt6.QtCore import Qt, QTimer, QPoint, QRect
 from PyQt6.QtGui import QPixmap, QPainter, QAction, QIcon, QMouseEvent
 
@@ -62,10 +62,6 @@ class MomWidget(QWidget):
         self.drag_start_position = QPoint()
         self.bubble = None
         self.popups = []
-
-        # System Tray
-        script_dir = os.path.dirname(__file__)
-        self.init_tray_icon(script_dir)
 
         # Popup Timer
         self.timer = QTimer(self)
@@ -178,24 +174,6 @@ class MomWidget(QWidget):
     def set_look(self, filename):
         self.load_pixmap(filename)
 
-    def init_tray_icon(self, script_dir):
-        icon_path = get_asset_path(ICON_FILENAME)
-        self.tray_icon = QSystemTrayIcon(self)
-        if os.path.exists(icon_path):
-            self.tray_icon.setIcon(QIcon(icon_path))
-        else:
-            self.tray_icon.setIcon(
-                self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon)
-            )
-
-        tray_menu = QMenu()
-        exit_action = QAction("Exit", self)
-        exit_action.triggered.connect(self.quit_app)
-        tray_menu.addAction(exit_action)
-
-        self.tray_icon.setContextMenu(tray_menu)
-        self.tray_icon.show()
-
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -252,7 +230,6 @@ class MomWidget(QWidget):
         self.popups.append(popup)
 
     def quit_app(self):
-        self.tray_icon.hide()
         QApplication.quit()
 
 def main(command_queue=None, messages=None):
