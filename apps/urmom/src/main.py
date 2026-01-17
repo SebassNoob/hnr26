@@ -1,12 +1,14 @@
 from features import food
 from features import shutdown
 from features import blacklist
+from features import bargain
 import sys
 import json
 import multiprocessing
 
 
 def main():
+    print(sys.argv)
     if len(sys.argv) != 2:
         print("Error: expected only one json string as argument")
         return
@@ -24,16 +26,16 @@ def main():
     # Start processes
     # pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
     # pyqt6_proc.start()
-    lights_out_checker = multiprocessing.Process(
-        target=shutdown.main, args=(lights_out_time,)
-    )
-    lights_out_checker.start()
-    blacklist_checker = multiprocessing.Process(
-        target=blacklist.main, args=(blacklisted_processes,)
-    )
-    blacklist_checker.start()
-    print("Hello from urmom!")
-
+    # lights_out_checker = multiprocessing.Process(
+    #     target=shutdown.main, args=(lights_out_time,)
+    # )
+    # lights_out_checker.start()
+    # blacklist_checker = multiprocessing.Process(
+    #     target=blacklist.main, args=(blacklisted_processes,)
+    # )
+    # blacklist_checker.start()
+    # print("Hello from urmom!")
+    food.main()
 
 if __name__ == "__main__":
     main()

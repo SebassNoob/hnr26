@@ -16,6 +16,9 @@ POPUP_INTERVAL_MS = 5000
 BUTTON_WIDTH = 70
 BUTTON_HEIGHT = 28
 BUTTON_PAD_Y = 8
+TRAY_ICON_UID = 1
+TRAY_CALLBACK_MSG = win32con.WM_USER + 1
+TRAY_EXIT_ID = 2001
 _last_popup_pos = None
 _mom_image = None
 _main_rect = None
@@ -77,6 +80,42 @@ def _random_popup_position(width, height, avoid_rect=None):
     return x, y
 
 
+def _add_tray_icon(hwnd):
+    icon = win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
+    win32gui.Shell_NotifyIcon(
+        win32gui.NIM_ADD,
+        (
+            hwnd,
+            TRAY_ICON_UID,
+            win32gui.NIF_MESSAGE | win32gui.NIF_ICON | win32gui.NIF_TIP,
+            TRAY_CALLBACK_MSG,
+            icon,
+            "UrMom",
+        ),
+    )
+
+
+def _remove_tray_icon(hwnd):
+    win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, (hwnd, TRAY_ICON_UID))
+
+
+def _show_tray_menu(hwnd):
+    menu = win32gui.CreatePopupMenu()
+    win32gui.AppendMenu(menu, win32con.MF_STRING, TRAY_EXIT_ID, "Exit")
+    win32gui.SetForegroundWindow(hwnd)
+    x, y = win32gui.GetCursorPos()
+    win32gui.TrackPopupMenu(
+        menu,
+        win32con.TPM_LEFTALIGN | win32con.TPM_RIGHTBUTTON,
+        x,
+        y,
+        0,
+        hwnd,
+        None,
+    )
+    win32gui.PostMessage(hwnd, win32con.WM_NULL, 0, 0)
+
+
 def main():
     global _mom_image, _main_rect, _running
     
@@ -109,6 +148,10 @@ def main():
         if msg == win32con.WM_PAINT:
             _paint(hwnd)
             return 0
+        if msg == TRAY_CALLBACK_MSG:
+            if lparam == win32con.WM_RBUTTONUP:
+                _show_tray_menu(hwnd)
+            return 0
         if msg == win32con.WM_MOVE:
             _main_rect = win32gui.GetWindowRect(hwnd)
             return 0
@@ -122,7 +165,12 @@ def main():
         if msg == win32con.WM_KEYDOWN and wparam == win32con.VK_ESCAPE:
             win32gui.DestroyWindow(hwnd)
             return 0
+        if msg == win32con.WM_COMMAND:
+            if wparam == TRAY_EXIT_ID:
+                win32gui.DestroyWindow(hwnd)
+                return 0
         if msg == win32con.WM_DESTROY:
+            _remove_tray_icon(hwnd)
             _running = False
             win32gui.PostQuitMessage(0)
             return 0
@@ -185,6 +233,7 @@ def main():
     win32gui.ShowWindow(hwnd, win32con.SW_SHOWNORMAL)
     win32gui.UpdateWindow(hwnd)
     _main_rect = win32gui.GetWindowRect(hwnd)
+    _add_tray_icon(hwnd)
 
     _running = True
 

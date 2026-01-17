@@ -1,1 +1,1 @@
-from .bargain import negotiate_time
+from .bargain import main, negotiate_time
