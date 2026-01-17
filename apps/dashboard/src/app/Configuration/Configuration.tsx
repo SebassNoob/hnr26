@@ -1,21 +1,10 @@
 import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { TimePicker, Button, Text, MultiCombobox } from "@shared/ui";
 import { useEffect, useEffectEvent } from "react";
+import { configSchema, type Config } from "./configSchema";
 
-// Time format regex: HH:mm
-const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
-
-const configSchema = z.object({
-	lightsOutStart: z.string().regex(timeRegex, "Must be in format HH:mm (e.g., 22:00)"),
-	lightsOutEnd: z.string().regex(timeRegex, "Must be in format HH:mm (e.g., 06:00)"),
-	blacklistedProcesses: z.array(z.string()).min(1, "At least one process is required"),
-	nag: z.array(z.string()).min(1, "At least one nag message is required"),
-	slipperEnabled: z.boolean(),
-});
-
-type ConfigFormData = z.infer<typeof configSchema>;
+type ConfigFormData = Config;
 
 export function Configuration() {
 	const {
@@ -49,24 +38,22 @@ export function Configuration() {
 		} catch (error) {
 			console.error("Error loading config:", error);
 		}
-	})
+	});
 
 	const onSubmit: SubmitHandler<ConfigFormData> = async (data) => {
-		
 		try {
 			const result = await window.ipcRenderer.invoke("save-config", data);
 			if (!result.success) {
-				
 				alert(`Failed to save configuration: ${result.error}`);
-        return;
+				return;
 			}
 
-      // launch with new config
+			// launch with new config
 
-      const execResult = await window.ipcRenderer.invoke("execute-urmom", [JSON.stringify(data)]);
-      if (!execResult.success) {
-        alert(`Failed to execute UrMom: ${execResult.stderr}`);
-      }
+			const execResult = await window.ipcRenderer.invoke("execute-urmom", [JSON.stringify(data)]);
+			if (!execResult.success) {
+				alert(`Failed to execute UrMom: ${execResult.stderr}`);
+			}
 		} catch (error) {
 			console.error("Error saving config:", error);
 			alert("Failed to save configuration");
@@ -76,9 +63,9 @@ export function Configuration() {
 	return (
 		<div className="p-6 max-w-2xl">
 			<div className="mb-6">
-				<Text className="text-2xl font-bold text-black dark:text-white">Configuration</Text>
+				<Text className="text-2xl font-bold text-black dark:text-white">UrMom Launcher</Text>
 				<Text className="text-gray-600 dark:text-gray-400 mt-1">
-					Set up your parental control settings
+					Set your desired configuration options below and save to apply and launch UrMom.
 				</Text>
 			</div>
 
@@ -88,7 +75,7 @@ export function Configuration() {
 						Lights Out Time Range
 					</Text>
 					<Text className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-						Time range when access is restricted
+						Time range when your mother will shut your computer off.
 					</Text>
 					<div className="grid grid-cols-2 gap-4">
 						<TimePicker
@@ -113,7 +100,7 @@ export function Configuration() {
 								<div className="flex-1">
 									<MultiCombobox
 										label="Blacklisted Processes"
-										description="Enter process names to block (e.g., chrome.exe, steam.exe)"
+										description="Enter distractions for your mom to block (e.g., chrome, steam)."
 										placeholder="Type process name and press Enter or Add"
 										items={[]}
 										onValueChange={field.onChange}
@@ -149,7 +136,7 @@ export function Configuration() {
 					render={({ field }) => (
 						<MultiCombobox
 							label="Nag Messages"
-							description="Messages to display to the user when they try to access blocked content"
+							description="What messages should your mom use to nag you."
 							placeholder="Type a message and press Enter or Add"
 							items={[]}
 							onValueChange={field.onChange}
