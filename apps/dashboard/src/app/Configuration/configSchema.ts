@@ -8,6 +8,7 @@ export const configSchema = z.object({
 	lightsOutEnd: z.string().regex(timeRegex, "Must be in format HH:mm (e.g., 06:00)"),
 	blacklistedProcesses: z.array(z.string()).min(1, "At least one process is required"),
 	nag: z.array(z.string()).min(1, "At least one nag message is required"),
+	screenshotFreqMin: z.number().min(1).max(60).optional(),
 	slipperEnabled: z.boolean(),
 });
 
@@ -39,5 +40,6 @@ export const defaultConfig: Config = {
 		"Your mom believes in you!",
 		"Make her proud!",
 	],
+	screenshotFreqMin: 5,
 	slipperEnabled: false,
 };

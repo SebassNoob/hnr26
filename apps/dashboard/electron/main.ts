@@ -140,9 +140,13 @@ ipcMain.handle("load-config", async () => {
 		const config = JSON.parse(data);
 		const parsed = configSchema.safeParse(config);
 		if (!parsed.success) {
+			console.warn(
+				"Config on disk is invalid, falling back to defaults.",
+				formatZodIssues(parsed.error.issues),
+			);
 			return {
-				success: false,
-				error: `Invalid configuration on disk: ${formatZodIssues(parsed.error.issues)}`,
+				success: true,
+				data: defaultConfig,
 			};
 		}
 
