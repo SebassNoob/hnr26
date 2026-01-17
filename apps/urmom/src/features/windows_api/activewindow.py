@@ -19,11 +19,3 @@ def get_active_process_info():
         }
     except psutil.NoSuchProcess:
         return None
-
-
-def main():
-    pass
-
-
-if __name__ == "__main__":
-    main()

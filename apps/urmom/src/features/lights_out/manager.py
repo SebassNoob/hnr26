@@ -4,17 +4,12 @@ from ..windows_api.shutdown import shutdown_computer
 from .gui import show_warning_dialog
 
 
-def parse_time_str(t_str):
-    if t_str.startswith("T"):
-        t_str = t_str[1:]
+def parse_time_str(t_str: str) -> dt_time | None:
     try:
-        return datetime.strptime(t_str, "%H:%M:%S").time()
+        return datetime.strptime(t_str, "%H:%M").time()
     except ValueError:
-        try:
-            return datetime.strptime(t_str, "%H:%M").time()
-        except ValueError:
-            print(f"Error parsing time: {t_str}")
-            return None
+        print(f"Error parsing time: {t_str}")
+        return None
 
 
 def is_currently_in_blackout(now_time, start_time, end_time):
@@ -52,11 +47,10 @@ def main(start_str, end_str, dev_mode, mom_queue=None):
         minutes_left = diff.total_seconds() / 60.0
         physically_in_window = is_currently_in_blackout(now.time(), t_start, t_end)
 
-        if minutes_left <= 0:
-            if physically_in_window or minutes_left < -1:
-                shutdown_computer(dev_mode)
-                print("Time limit reached. SHUTDOWN.")
-                break
+        if minutes_left <= 0 and (physically_in_window or minutes_left < -1):
+            shutdown_computer(dev_mode)
+            print("Time limit reached. SHUTDOWN.")
+            break
 
         current_checkpoint = None
         if 14.5 < minutes_left < 15.5 and not warned_checkpoints[15]:

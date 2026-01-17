@@ -26,14 +26,15 @@ def terminate_blacklisted_process(pid: int, name: str, exe: str) -> None:
 
 
 def main(blacklisted_processes: list[str], dev_mode) -> None:
-    if dev_mode != "1":
-        log(
-            "Blacklist process started with blacklisted processes: "
-            + ", ".join(blacklisted_processes)
-        )
-        while True:
-            find_and_kill_blacklisted_process(blacklisted_processes)
-            time.sleep(10)
+    if dev_mode == "1":
+        return
+    log(
+        "Blacklist process started with blacklisted processes: "
+        + ", ".join(blacklisted_processes)
+    )
+    while True:
+        find_and_kill_blacklisted_process(blacklisted_processes)
+        time.sleep(10)
 
 
 if __name__ == "__main__":
