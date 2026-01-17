@@ -60,8 +60,7 @@ def main():
 
     if lights_out_start and lights_out_end:
         lights_out_proc = multiprocessing.Process(
-            target=lights_out.main, 
-            args=(lights_out_start, lights_out_end)
+            target=lights_out.main, args=(lights_out_start, lights_out_end)
         )
         lights_out_proc.start()
     mom.main()

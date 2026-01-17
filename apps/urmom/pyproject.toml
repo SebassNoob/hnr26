@@ -10,6 +10,8 @@ dependencies = [
     "watchdog>=4.0.0",
     "psutil>=7.2.1",
     "pyqt6>=6.10.2",
+    "pillow>=12.1.0",
+    "litellm>=1.80.17",
 ]
 
 [project.optional-dependencies]
