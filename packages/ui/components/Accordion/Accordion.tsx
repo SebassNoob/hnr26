@@ -30,7 +30,7 @@ export function Accordion({
 					{additionalButtons}
 					<ChevronDownIcon
 						className={twMerge(
-							"size-5 stroke-2 stroke-gray-700 dark:stroke-gray-300 transition-transform duration-200 group-data-[open]:rotate-180 cursor-pointer",
+							"size-5 stroke-2 stroke-gray-700 dark:stroke-gray-300 transition-transform duration-200 group-data-open:rotate-180 cursor-pointer",
 							iconClassName,
 						)}
 					/>

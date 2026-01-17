@@ -7,6 +7,10 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
     },
+    "@hnr26/dashboard#build": {
+      "dependsOn": ["@hnr26/urmom#build"],
+      "outputs": ["dist/**", "dist-electron/**", "release/**"]
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },
