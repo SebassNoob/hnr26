@@ -73,7 +73,7 @@ def main():
 
     # 1. Blacklist Process
     blacklist_checker = multiprocessing.Process(
-        target=blacklist.main, args=(blacklisted_processes, dev_mode)
+        target=blacklist.main, args=(blacklisted_processes, dev_mode, mom_command_queue)
     )
     procs.append(blacklist_checker)
 

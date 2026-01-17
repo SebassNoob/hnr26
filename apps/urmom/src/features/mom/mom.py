@@ -36,6 +36,7 @@ class MomWidget(QWidget):
 
         self.command_queue = command_queue
         self.messages = messages
+        self.original_messages = messages if messages else ["Drink some water.", "Sit up straight."]
 
         # Window Setup
         self.setWindowFlags(
@@ -96,6 +97,34 @@ class MomWidget(QWidget):
         elif msg_type == "set_expression":
             asset = cmd.get("asset", "mom.png")
             self.set_look(asset)
+
+        elif msg_type == "show_blacklist_message":
+            process_name = cmd.get("process", "unknown")
+            self.show_blacklist_message(process_name)
+
+    def show_blacklist_message(self, process_name):
+        """Show a bubble with a message about the blacklisted process."""
+        message = f"EH WHY ARE YOU RUNNING {process_name.upper()}??? STOP IT RIGHT NOW!"
+        if not self.bubble:
+            self.bubble = BubbleWidget(self.geometry(), [message])
+        else:
+            self.bubble.messages = [message]
+            self.bubble.phrase_index = 0
+            self.bubble.text = message
+        self.bubble.set_target_geometry(self.geometry())
+        self.bubble.show()
+        self.bubble.activateWindow()
+        # Restore original messages after 5 seconds
+        QTimer.singleShot(5000, self.restore_bubble_messages)
+
+    def restore_bubble_messages(self):
+        """Restore the bubble to show original nagging messages."""
+        if self.bubble:
+            self.bubble.messages = self.original_messages
+            self.bubble.phrase_index = 0
+            self.bubble.text = self.original_messages[0] if self.original_messages else ""
+            self.bubble.adjust_size_and_position()
+            self.bubble.update()
 
     def load_pixmap(self, filename):
         img_path = get_asset_path(filename)
