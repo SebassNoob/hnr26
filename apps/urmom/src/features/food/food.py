@@ -208,6 +208,7 @@ def main():
     win32gui.SetLayeredWindowAttributes(
         hwnd, TRANSPARENT_COLOR, 0, win32con.LWA_COLORKEY
     )
+<<<<<<< HEAD
     win32gui.ShowWindow(hwnd, win32con.SW_SHOWNORMAL)
     win32gui.UpdateWindow(hwnd)
     _main_rect = win32gui.GetWindowRect(hwnd)
@@ -220,3 +221,10 @@ def main():
         popup_window.create_popup(hinstance, px, py, TRANSPARENT_COLOR)
 
     timer_loop.run_timer_loop(POPUP_INTERVAL_MS, on_timer_tick, lambda: _running)
+=======
+    win32gui.ShowWindow(hwnd, win32con.SW_SHOWNORMAL)
+    win32gui.UpdateWindow(hwnd)
+    _main_rect = win32gui.GetWindowRect(hwnd)
+
+    win32gui.PumpMessages()
+>>>>>>> 898b9f87af2edf74cf82f5a28377081b793a7d62
