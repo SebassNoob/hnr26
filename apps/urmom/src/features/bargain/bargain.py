@@ -45,6 +45,7 @@ def negotiate_time(user_excuse: str, model=DEFAULT_MODEL):
     """
 
     try:
+        print("submitting excuse: ", user_excuse)
         response = completion(
             model=model,
             messages=[
@@ -53,6 +54,7 @@ def negotiate_time(user_excuse: str, model=DEFAULT_MODEL):
             ],
             temperature=0.7,
         )
+        print("received response: ", response)
         
         # Parse JSON response
         data = json.loads(response.choices[0].message.content)

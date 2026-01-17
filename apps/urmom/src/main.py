@@ -1,7 +1,11 @@
 from features import mom
 from features import shutdown
 from features import blacklist
+<<<<<<< HEAD
 from features import bargain
+=======
+from features import lights_out
+>>>>>>> bargaining
 import sys
 import json
 import multiprocessing
@@ -9,12 +13,18 @@ import multiprocessing
 
 def main():
     print(sys.argv)
+<<<<<<< HEAD
+=======
+    print(len(sys.argv))
+>>>>>>> bargaining
     if len(sys.argv) != 2:
         print("Error: expected only one json string as argument")
         return
     # Extract json data
     try:
+        print("j")
         json_args = json.loads(sys.argv[1])
+        print(json_args)
     except json.JSONDecodeError:
         print("Error: argument is not valid json")
         return
@@ -34,8 +44,14 @@ def main():
     #     target=blacklist.main, args=(blacklisted_processes,)
     # )
     # blacklist_checker.start()
-    # print("Hello from urmom!")
+
+    lights_out_proc = multiprocessing.Process(
+        target=lights_out.main, args=(lights_out_time,)
+    )
+    lights_out_proc.start()
     mom.main()
+    print("Hello from urmom!")
+
 
 if __name__ == "__main__":
     main()
