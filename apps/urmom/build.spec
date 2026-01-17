@@ -1,21 +1,36 @@
 # -*- mode: python ; coding: utf-8 -*-
-
 import sys
 import os
+# --- FIX IMPORT ---
+from PyInstaller.utils.hooks import collect_all
 
 # Check for dev build flag
 dev_build = os.environ.get('DEV_BUILD') == '1'
 
+# Initialize lists
 datas = []
+binaries = []
+hiddenimports = ['win32api', 'win32timezone', 'win32security', 'win32con', 'psutil']
+
+# --- FIX: Collect all litellm files/dependencies ---
+# This grabs the missing tokenizers and core utils
+lm_datas, lm_binaries, lm_hidden = collect_all('litellm')
+datas += lm_datas
+binaries += lm_binaries
+hiddenimports += lm_hidden
+# ---------------------------------------------------
+datas.append(('src/features/mom/mom.png', 'features/mom'))
+datas.append(('src/features/mom/mom.ico', 'features/mom'))
+
 if dev_build:
     datas.append(('dev_mode.txt', '.'))
 
 a = Analysis(
-    ['src/main.py'],
+    ['src/main.py'],  # Ensure this path points to your main.py correctly!
     pathex=[],
-    binaries=[],
-    datas=datas,
-    hiddenimports=['win32api', 'win32timezone', 'win32security', 'win32con', 'psutil'],
+    binaries=binaries,       # Updated list
+    datas=datas,             # Updated list
+    hiddenimports=hiddenimports, # Updated list
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -38,7 +53,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=dev_build,
+    console=dev_build, 
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

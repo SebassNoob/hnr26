@@ -1,4 +1,4 @@
-from features import mom
+from features import mom_2 as mom
 from features import shutdown
 from features import blacklist
 from features import bargain
