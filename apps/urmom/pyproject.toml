@@ -7,4 +7,16 @@ requires-python = ">=3.12"
 dependencies = [
     "pywin32>=311",
     "pyinstaller>=6.0.0",
+    "watchdog>=4.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "watchdog>=6.0.0",
 ]

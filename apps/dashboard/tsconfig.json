@@ -1,0 +1,10 @@
+{
+  "extends": "@shared/tooling/typescript",
+  "compilerOptions": {
+    "module": "esnext",
+    "sourceMap": true,
+    "baseUrl": ".",
+    "outDir": "dist",
+    "resolveJsonModule": true
+  }
+}
