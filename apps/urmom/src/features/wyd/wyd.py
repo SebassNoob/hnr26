@@ -5,29 +5,12 @@ import base64
 import json
 from litellm import completion
 from PIL import ImageGrab
-from dotenv import load_dotenv
+from utils.env import load_env
 
 # --- Constants ---
 DEFAULT_MODEL = "groq/meta-llama/llama-4-scout-17b-16e-instruct" 
 CHECK_INTERVAL_SECONDS =  5 * 60  # 5 minutes
 ANIMATION_DELAY_SECONDS = 2
-
-def _load_env():
-    # Correctly locate the .env file at the project root
-    if hasattr(sys, '_MEIPASS'):
-        # In PyInstaller bundle
-        base_dir = sys._MEIPASS
-    else:
-        # In development
-        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    
-    env_path = os.path.join(base_dir, ".env")
-    
-    if os.path.exists(env_path):
-        load_dotenv(dotenv_path=env_path)
-        print("WYD: Loaded environment variables from .env file.")
-    else:
-        print("WYD: .env file not found.")
 
 def take_screenshot():
     """Takes a screenshot and returns the path to a temporary file."""
@@ -107,7 +90,7 @@ def analyze_activity(image_path, model=DEFAULT_MODEL):
             os.remove(image_path)
 
 def main(mom_queue=None):
-    _load_env()
+    load_env()
     if not os.environ.get("GROQ_API_KEY"):
         print("⚠️ WYD: GROQ_API_KEY not found in environment. This feature will be disabled.")
         return

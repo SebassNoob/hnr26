@@ -4,7 +4,10 @@ import os
 def load_env():
     """
     Loads .env file into os.environ.
-    Supports Dev mode (looking in root) and PyInstaller mode (sys._MEIPASS).
+    Supports Dev mode (looking in urmom root) and PyInstaller mode (sys._MEIPASS).
+    
+    In dev mode, looks for .env in the urmom directory.
+    In PyInstaller mode, looks for .env in sys._MEIPASS.
     """
     env_path = None
     
@@ -12,8 +15,8 @@ def load_env():
     if hasattr(sys, '_MEIPASS'):
         env_path = os.path.join(sys._MEIPASS, '.env')
     else:
-        # 2. Check if running in Dev (root dir)
-        # Path: src/utils/env.py -> src/utils -> src -> [Root]
+        # 2. Check if running in Dev (urmom root dir)
+        # Path: src/utils/env.py -> src/utils -> src -> [urmom root]
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         env_path = os.path.join(base_dir, '.env')
 
