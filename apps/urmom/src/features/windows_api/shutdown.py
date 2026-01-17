@@ -2,9 +2,13 @@ import win32api
 import win32con
 import win32security
 import datetime
+import time
 
 def check_for_lights_out(lights_out_time):
-    current_time = datetime.datetime.now().time()
+    current_time = datetime.datetime.now()
+    """
+    formatting to be done...
+    """
     return current_time >= lights_out_time
 
 def shutdown_computer():
@@ -19,8 +23,11 @@ def shutdown_computer():
     #Shutdown
     win32api.InitiateSystemShutdown(None, shutdown_message, 10, False, False)
 
-def main():
-    shutdown_computer()
+def main(lights_out_time):
+    while True:
+        time.sleep(60)  # Check every minute
+        if check_for_lights_out(lights_out_time):
+            shutdown_computer()
 
 if __name__ == "__main__":
     main()

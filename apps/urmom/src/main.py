@@ -2,11 +2,13 @@ from features import food
 from features import shutdown
 import sys
 import json
+import multiprocessing
 
 def main():
     if len(sys.argv) != 2:
         print("Error: expected only one json string as argument")
         return
+    # Extract json data
     try:
         json_args = json.loads(sys.argv[1])
     except json.JSONDecodeError:
@@ -16,7 +18,12 @@ def main():
     blacklisted_processes = json_args["blacklistedProcesses"]
     nag = json_args["nag"]
     slipper_enabled = json_args["slipperEnabled"]
-    shutdown.main()
+
+    # Start processes
+    #pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
+    #pyqt6_proc.start()
+    lights_out_checker = multiprocessing.Process(target=shutdown.main, args=(lights_out_time,))
+    lights_out_checker.start()
     print("Hello from urmom!")
 
 
