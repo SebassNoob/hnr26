@@ -3,6 +3,7 @@ import win32security
 import datetime
 import time
 
+
 def check_for_lights_out(lights_out_time):
     current_time = datetime.datetime.now()
     """
