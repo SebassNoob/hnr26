@@ -148,7 +148,3 @@ class BubbleWidget(QWidget):
         painter.drawText(
             text_rect, Qt.TextFlag.TextWordWrap | Qt.AlignmentFlag.AlignLeft, self.text
         )
-
-    def mousePressEvent(self, event):
-        # Click to close
-        self.close()
