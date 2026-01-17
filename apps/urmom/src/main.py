@@ -36,7 +36,8 @@ def main():
     except json.JSONDecodeError:
         log("Error: argument is not valid json")
         return
-    lights_out_time = json_args["lightsOut"]
+    lights_out_start = json_args["lightsOutStart"]
+    lights_out_end = json_args["lightsOutEnd"]
     blacklisted_processes = json_args["blacklistedProcesses"]
     nag = json_args["nag"]
     slipper_enabled = json_args["slipperEnabled"]
