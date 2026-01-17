@@ -8,6 +8,8 @@ from PyQt6.QtGui import QPixmap, QPainter, QAction, QIcon, QMouseEvent
 from .bubble import BubbleWidget
 from .popup import PopupWidget
 
+from utils.paths import get_asset_path
+
 # Constants
 IMAGE_FILENAME = "mom.png"
 ICON_FILENAME = "mom.ico"
@@ -29,10 +31,7 @@ class MomWidget(QWidget):
 
         # Load Resources
         script_dir = os.path.dirname(__file__)
-        img_path = os.path.join(script_dir, "..", "mom", IMAGE_FILENAME) # Check sibling folder or local
-        if not os.path.exists(img_path):
-             img_path = os.path.join(script_dir, IMAGE_FILENAME)
-
+        img_path = get_asset_path(IMAGE_FILENAME)
         self.pixmap = QPixmap(img_path)
         if self.pixmap.isNull():
             # Fallback red box
@@ -67,9 +66,7 @@ class MomWidget(QWidget):
         self.timer.start(POPUP_INTERVAL_MS)
 
     def init_tray_icon(self, script_dir):
-        icon_path = os.path.join(script_dir, "..", "mom", ICON_FILENAME)
-        if not os.path.exists(icon_path):
-             icon_path = os.path.join(script_dir, ICON_FILENAME)
+        icon_path = get_asset_path(ICON_FILENAME)
         
         self.tray_icon = QSystemTrayIcon(self)
         if os.path.exists(icon_path):
