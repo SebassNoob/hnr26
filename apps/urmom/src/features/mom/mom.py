@@ -3,8 +3,9 @@ import os
 import random
 import queue  # For the Empty exception
 from PyQt6.QtWidgets import QApplication, QWidget, QMenu
-from PyQt6.QtCore import Qt, QTimer, QPoint, QRect
-from PyQt6.QtGui import QPixmap, QPainter, QAction, QIcon, QMouseEvent
+from PyQt6.QtCore import Qt, QTimer, QPoint, QRect, QUrl
+from PyQt6.QtGui import QPixmap, QPainter, QAction, QIcon, QMouseEvent, QTransform
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 from .bubble import BubbleWidget
 from .popup import PopupWidget
@@ -39,6 +40,15 @@ class MomWidget(QWidget):
         self.messages = messages
         self.original_messages = messages if messages else ["Drink some water.", "Sit up straight."]
         self.anger = 0  # Anger meter, 0 = normal, higher = angrier
+        self.is_animating = False # Flag to prevent animations from overlapping
+
+        # --- Audio Setup for Camera ---
+        self.audio_output_camera = QAudioOutput()
+        self.player_camera = QMediaPlayer()
+        self.player_camera.setAudioOutput(self.audio_output_camera)
+        self.player_camera.setSource(QUrl.fromLocalFile(get_asset_path("camera.mp3")))
+        self.audio_output_camera.setVolume(1.0)
+        # ------------------------------
 
         # Window Setup
         self.setWindowFlags(
@@ -49,7 +59,9 @@ class MomWidget(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         # Initial Load
-        self.load_pixmap(IMAGE_FILENAME)
+        # Store the current "mood" image filename to revert to after animations
+        self.current_look_filename = self.get_anger_image() 
+        self.load_pixmap(self.current_look_filename)
         
         # Initial Position
         screen_geo = self.screen().geometry()
@@ -108,6 +120,9 @@ class MomWidget(QWidget):
         elif msg_type == "change_anger":
             delta = cmd.get("delta", 0)
             self.update_anger(delta)
+        
+        elif msg_type == "prepare_for_screenshot":
+            self.play_camera_animation()
 
     def get_anger_image(self):
         """Returns the image filename corresponding to the anger level."""
@@ -128,7 +143,7 @@ class MomWidget(QWidget):
         self.anger += delta
         # --- CHANGE ---
         # Clamp anger at 0, but allow it to increase past 3.
-        self.anger = max(0, self.anger)
+        self.anger = max(0, min(4, self.anger))
         log(f"Anger updated to: {self.anger}")
 
         # Check for the slipper threshold
@@ -170,7 +185,7 @@ class MomWidget(QWidget):
             self.bubble.adjust_size_and_position()
             self.bubble.update()
 
-    def load_pixmap(self, filename):
+    def load_pixmap(self, filename, flip_horizontal=False):
         img_path = get_asset_path(filename)
         pix = QPixmap(img_path)
         
@@ -178,17 +193,46 @@ class MomWidget(QWidget):
             pix = QPixmap(100, 100)
             pix.fill(Qt.GlobalColor.red)
         else:
-            if MOM_SCALE != 1.0:
-                w = int(pix.width() * MOM_SCALE)
-                h = int(pix.height() * MOM_SCALE)
-                pix = pix.scaled(w, h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            w = int(pix.width() * MOM_SCALE); h = int(pix.height() * MOM_SCALE)
+            pix = pix.scaled(w, h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        
+        if flip_horizontal:
+            transform = QTransform().scale(-1, 1)
+            pix = pix.transformed(transform)
         
         self.pixmap = pix
         self.resize(self.pixmap.size())
         self.update()
 
-    def set_look(self, filename):
-        self.load_pixmap(filename)
+    def set_look(self, filename, flip_horizontal=False):
+        self.load_pixmap(filename, flip_horizontal)
+
+    def play_camera_animation(self):
+        """Plays the camera animation, flipping based on screen position."""
+        if self.is_animating: return # Prevent overlapping animations
+        self.is_animating = True
+
+        screen_center_x = self.screen().geometry().width() / 2
+        is_on_left_side = self.x() < screen_center_x
+
+        # State 1: Pull out the camera
+        self.set_look("mom_camera.png", flip_horizontal=is_on_left_side)
+
+        def flash_and_snap():
+            # State 2: Flash the camera and play sound
+            self.set_look("mom_camera_flash.png", flip_horizontal=is_on_left_side)
+            self.player_camera.setPosition(0) # Rewind sound
+            self.player_camera.play()
+            # Schedule the final state
+            QTimer.singleShot(200, revert_to_normal)
+
+        def revert_to_normal():
+            # State 3: Revert to her normal mood appearance
+            self.set_look(self.current_look_filename)
+            self.is_animating = False # Release the animation lock
+
+        # Schedule the flash
+        QTimer.singleShot(750, flash_and_snap)
 
     def paintEvent(self, event):
         painter = QPainter(self)

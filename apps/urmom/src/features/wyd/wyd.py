@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 # --- Constants ---
 DEFAULT_MODEL = "groq/meta-llama/llama-4-scout-17b-16e-instruct" 
 CHECK_INTERVAL_SECONDS =  10  # 5 minutes
+ANIMATION_DELAY_SECONDS = 2
 
 def _load_env():
     # Correctly locate the .env file at the project root
@@ -114,13 +115,19 @@ def main(mom_queue=None):
     print("👀 WYD Manager started. Checking screen every 5 minutes.")
     
     while True:
-        screenshot_path = take_screenshot()
-        if not screenshot_path:
-            time.sleep(CHECK_INTERVAL_SECONDS)
-            continue
+        # 1. Tell Mom to get ready for the picture
+        if mom_queue:
+            print("WYD: Telling Mom to take a picture.")
+            mom_queue.put({"type": "prepare_for_screenshot"})
+            time.sleep(ANIMATION_DELAY_SECONDS) # Give animation time to play
 
-        analysis = analyze_activity(screenshot_path)
+        # 2. Take the screenshot and analyze it
+        screenshot_path = take_screenshot()
+        analysis = None
+        if screenshot_path:
+            analysis = analyze_activity(screenshot_path)
         
+        # 3. Send the analysis results back to Mom
         if analysis and mom_queue:
             reply = analysis.get("reply")
             score = analysis.get("score")
@@ -131,10 +138,10 @@ def main(mom_queue=None):
                     "text": reply,
                     "score": score
                 })
-
-                if score < -0.3:  # Unproductive
+                if score < -0.3:
                     mom_queue.put({"type": "change_anger", "delta": 1})
-                elif score > 0.3:  # Productive
+                elif score > 0.3:
                     mom_queue.put({"type": "change_anger", "delta": -1})
 
-        time.sleep(CHECK_INTERVAL_SECONDS)
+        # 4. Wait for the next cycle
+        time.sleep(CHECK_INTERVAL_SECONDS - ANIMATION_DELAY_SECONDS)
