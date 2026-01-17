@@ -1,12 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import sys
+
+# Check for dev build flag
+dev_build = '--dev' in sys.argv
 
 a = Analysis(
     ['src/main.py'],
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['win32api', 'win32timezone'],
+    hiddenimports=['win32api', 'win32timezone', 'win32security', 'win32con', 'psutil'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -23,13 +27,13 @@ exe = EXE(
     a.datas,
     [],
     name='urmom',
-    debug=False,
+    debug=dev_build,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=dev_build,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,

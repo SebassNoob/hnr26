@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "uv run watch.py",
     "dev:simple": "uv run src/main.py",
-    "build": "uvx pyinstaller build.spec --clean",
+    "build": "uv run pyinstaller build.spec --clean",
+    "dev": "uv run pyinstaller build.spec --clean --dev",
     "format": "uv format",
     "clean": "rm -rf dist/ build/ __pycache__/"
   }
