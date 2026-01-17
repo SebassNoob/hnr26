@@ -4,6 +4,7 @@ import win32con
 import win32gui
 
 from . import popup_window
+from . import timer_loop
 
 
 TRANSPARENT_COLOR = 0x00FF00FF  # BGR magenta
@@ -14,12 +15,14 @@ TEXT_FONT_WEIGHT = win32con.FW_BOLD
 TEXT_PAD_X = 12
 TEXT_PAD_Y = 10
 BUTTON_ID = 1001
+POPUP_INTERVAL_MS = 5000
 BUTTON_WIDTH = 70
 BUTTON_HEIGHT = 28
 BUTTON_PAD_Y = 8
 _last_popup_pos = None
 _text_rect = None
 _main_rect = None
+_running = True
 
 
 def _create_logfont(height, weight, face_name):
@@ -116,11 +119,11 @@ def _random_popup_position(width, height, avoid_rect=None):
 
 
 def main():
-    global _text_rect, _main_rect
+    global _text_rect, _main_rect, _running
     class_name = "TransparentTextWindow"
 
     def wnd_proc(hwnd, msg, wparam, lparam):
-        global _main_rect
+        global _main_rect, _running
         if msg == win32con.WM_PAINT:
             _paint(hwnd)
             return 0
@@ -145,6 +148,7 @@ def main():
             win32gui.DestroyWindow(hwnd)
             return 0
         if msg == win32con.WM_DESTROY:
+            _running = False
             win32gui.PostQuitMessage(0)
             return 0
         return win32gui.DefWindowProc(hwnd, msg, wparam, lparam)
@@ -208,4 +212,11 @@ def main():
     win32gui.UpdateWindow(hwnd)
     _main_rect = win32gui.GetWindowRect(hwnd)
 
-    win32gui.PumpMessages()
+    _running = True
+
+    def on_timer_tick():
+        popup_w, popup_h = popup_window.get_popup_size()
+        px, py = _random_popup_position(popup_w, popup_h, _main_rect)
+        popup_window.create_popup(hinstance, px, py, TRANSPARENT_COLOR)
+
+    timer_loop.run_timer_loop(POPUP_INTERVAL_MS, on_timer_tick, lambda: _running)
