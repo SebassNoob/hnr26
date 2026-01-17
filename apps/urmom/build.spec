@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_data_files
 
 import sys
 import os
@@ -10,12 +11,14 @@ datas = []
 if dev_build:
     datas.append(('dev_mode.txt', '.'))
 
+datas_files = collect_data_files('litellm')
+
 a = Analysis(
     ['src/main.py'],
     pathex=[],
     binaries=[],
-    datas=datas,
-    hiddenimports=['win32api', 'win32timezone', 'win32security', 'win32con', 'psutil'],
+    datas=datas_files,
+    hiddenimports=['win32api', 'win32timezone', 'win32security', 'win32con', 'psutil', 'litellm', 'litellm.litellm_core_utils', 'litellm.litellm_core_utils.tokenizers'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
