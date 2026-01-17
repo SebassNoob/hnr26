@@ -42,6 +42,7 @@ def main():
     slipper_enabled = json_args["slipperEnabled"]
     log(f"Parsed arguments: lights_out_time={lights_out_time}, blacklisted_processes={blacklisted_processes}, nag={nag}, slipper_enabled={slipper_enabled}")
     # Start processes
+    multiprocessing.freeze_support()
     # pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
     # pyqt6_proc.start()
     # lights_out_checker = multiprocessing.Process(
