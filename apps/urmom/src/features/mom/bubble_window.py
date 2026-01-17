@@ -103,9 +103,7 @@ def _paint_bubble(hwnd):
             win32gui.FillRect(hdc, rect, bg_brush)
             win32gui.DeleteObject(bg_brush)
 
-        pen = win32gui.CreatePen(
-            win32con.PS_SOLID, 2, win32api.RGB(*BUBBLE_BORDER)
-        )
+        pen = win32gui.CreatePen(win32con.PS_SOLID, 2, win32api.RGB(*BUBBLE_BORDER))
         brush = win32gui.CreateSolidBrush(win32api.RGB(*BUBBLE_BG))
         old_pen = win32gui.SelectObject(hdc, pen)
         old_brush = win32gui.SelectObject(hdc, brush)
