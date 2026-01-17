@@ -37,7 +37,7 @@ def main(blacklisted_processes: list[str], dev_mode) -> None:
         )
         while True:
             find_and_kill_blacklisted_process(blacklisted_processes)
-            time.sleep(60)
+            time.sleep(10)
 
 
 if __name__ == "__main__":
