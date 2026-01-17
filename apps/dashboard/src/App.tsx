@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router";
-import { About, Configuration, NotFound } from "./app";
+import { About, Configuration, NotFound } from "./app/index";
 
 function App() {
 	return (
