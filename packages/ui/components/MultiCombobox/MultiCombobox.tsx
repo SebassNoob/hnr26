@@ -38,29 +38,29 @@ export function MultiCombobox({
 
 	return (
 		<div className={containerClassName}>
-			<div className="relative">
-				<Input
-					id={id}
-					label={label}
-					description={description}
-					error={error}
-					type="text"
-					value={query}
-					onChange={(e) => setQuery(e.target.value)}
-					onKeyDown={handleKeyDown}
-					placeholder={placeholder}
-					disabled={disabled}
-					className="pr-16"
-				/>
-				<button
-					type="button"
-					onClick={handleAddValue}
-					disabled={disabled || !query.trim()}
-					className="m-0.5 px-3 py-1 absolute bottom-1 right-1 flex items-center justify-center rounded text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-blue-500 text-white hover:bg-blue-600 focus-visible:ring-blue-500 disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed transition"
-				>
-					{addNewLabel}
-				</button>
-			</div>
+			<Input
+				id={id}
+				label={label}
+				description={description}
+				error={error}
+				type="text"
+				value={query}
+				onChange={(e) => setQuery(e.target.value)}
+				onKeyDown={handleKeyDown}
+				placeholder={placeholder}
+				disabled={disabled}
+				className="pr-16"
+				button={
+					<button
+						type="button"
+						onClick={handleAddValue}
+						disabled={disabled || !query.trim()}
+						className="m-0.5 px-3 py-1 flex items-center justify-center rounded text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-blue-500 text-white hover:bg-blue-600 focus-visible:ring-blue-500 disabled:opacity-50 disabled:hover:bg-blue-500 disabled:cursor-not-allowed transition"
+					>
+						{addNewLabel}
+					</button>
+				}
+			/>
 
 			{value.length > 0 && (
 				<div className="flex flex-wrap gap-2 mt-2">
