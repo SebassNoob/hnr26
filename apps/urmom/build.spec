@@ -21,8 +21,8 @@ datas += lm_datas
 binaries += lm_binaries
 hiddenimports += lm_hidden
 # ---------------------------------------------------
-datas.append(('src/features/mom/mom.png', 'features/mom'))
-datas.append(('src/features/mom/mom.ico', 'features/mom'))
+
+datas.append(('assets', 'assets')) 
 
 if dev_build:
     datas.append(('dev_mode.txt', '.'))
@@ -63,4 +63,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon='assets/mom.ico'
 )

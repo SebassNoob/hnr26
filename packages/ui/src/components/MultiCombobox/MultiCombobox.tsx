@@ -69,9 +69,7 @@ export function MultiCombobox({
 							key={val}
 							className="flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 dark:bg-blue-900/30"
 						>
-							<Text className="text-blue-800 dark:text-blue-200 text-sm">
-								{val}
-							</Text>
+							<Text className="text-blue-800 dark:text-blue-200 text-sm">{val}</Text>
 							<button
 								type="button"
 								onClick={() => handleRemoveValue(val)}

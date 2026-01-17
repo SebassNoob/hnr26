@@ -1,10 +1,6 @@
 import psutil
 import time
-
-
-def log(text):
-    with open("log.txt", "a") as f:
-        f.write(text + "\n")
+from utils import log
 
 
 def find_and_kill_blacklisted_process(blacklisted_processes: list[str]) -> None:

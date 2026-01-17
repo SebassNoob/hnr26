@@ -25,9 +25,7 @@
 	},
 	"exports": {
 		".": "./src/components",
-		"./components": "./src/components",
-		"./hooks": "./src/hooks",
-		"./providers": "./src/providers"
+		"./components": "./src/components"
 	},
 	"scripts": {
 		"format": "bunx biome format --write .",

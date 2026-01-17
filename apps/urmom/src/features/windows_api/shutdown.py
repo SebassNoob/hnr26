@@ -2,11 +2,7 @@ import win32api
 import win32security
 import datetime
 import time
-
-
-def log(text):
-    with open("log.txt", "a") as f:
-        f.write(text + "\n")
+from utils import log
 
 
 """

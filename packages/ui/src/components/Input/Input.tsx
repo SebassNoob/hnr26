@@ -53,11 +53,7 @@ export function Input({
 							{icon}
 						</span>
 					)}
-					{button && (
-						<div className="absolute inset-y-0 right-0.5 flex items-center">
-							{button}
-						</div>
-					)}
+					{button && <div className="absolute inset-y-0 right-0.5 flex items-center">{button}</div>}
 				</div>
 
 				{error && <Description className="text-red-500 text-xs">{error}</Description>}

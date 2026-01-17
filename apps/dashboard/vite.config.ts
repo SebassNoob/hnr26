@@ -6,7 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	base: './',
+	base: "./",
 	plugins: [
 		react(),
 		electron({
@@ -32,7 +32,7 @@ export default defineConfig({
 	],
 	resolve: {
 		alias: {
-			"@shared/ui": path.resolve(__dirname, "../../packages/ui/components"),
+			"@shared/ui": path.resolve(__dirname, "../../packages/ui/src/components"),
 		},
 	},
 });
