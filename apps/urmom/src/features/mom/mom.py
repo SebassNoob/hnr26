@@ -29,12 +29,13 @@ def get_mom_instance():
 
 
 class MomWidget(QWidget):
-    def __init__(self, command_queue=None):
+    def __init__(self, command_queue=None, messages=None):
         super().__init__()
         global _instance
         _instance = self
 
         self.command_queue = command_queue
+        self.messages = messages
 
         # Window Setup
         self.setWindowFlags(
@@ -176,7 +177,7 @@ class MomWidget(QWidget):
 
     def show_bubble(self):
         if not self.bubble:
-            self.bubble = BubbleWidget(self.geometry())
+            self.bubble = BubbleWidget(self.geometry(), self.messages)
         self.bubble.advance_phrase()
         self.bubble.set_target_geometry(self.geometry())
         self.bubble.show()
@@ -198,8 +199,7 @@ class MomWidget(QWidget):
         self.tray_icon.hide()
         QApplication.quit()
 
-
-def main(command_queue=None):
+def main(command_queue=None, messages=None):
     import signal
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -208,7 +208,7 @@ def main(command_queue=None):
     app.setQuitOnLastWindowClosed(False)
 
     # Pass queue to widget
-    window = MomWidget(command_queue)
+    window = MomWidget(command_queue, messages)
     window.show()
 
     sys.exit(app.exec())

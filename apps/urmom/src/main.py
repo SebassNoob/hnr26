@@ -54,33 +54,36 @@ def main():
     lights_out_start = Validation.validate_time_fmt(json_args["lightsOutStart"])
     lights_out_end = Validation.validate_time_fmt(json_args["lightsOutEnd"])
 
+    nagging_messages = json_args.get("naggingMessages", [])
     blacklisted_processes = Validation.validate_non_empty_list(
         json_args["blacklistedProcesses"]
     )
-
-    # --- FIX: IPC Queue ---
+    
     # Create a queue for sending commands to the Mom process
     mom_command_queue = multiprocessing.Queue()
-    # ----------------------
 
     log(
         f"Parsed arguments: lights_out_start={lights_out_start}, lights_out_end={lights_out_end}"
     )
 
-    # Start processes
+    # Prepare processes list
     procs = []
+
+    # 1. Blacklist Process
     blacklist_checker = multiprocessing.Process(
         target=blacklist.main, args=(blacklisted_processes, dev_mode)
     )
-    blacklist_checker.start()
+    procs.append(blacklist_checker)
 
-    lights_out_proc = multiprocessing.Process(
-        target=lights_out.main,
-        # Pass the queue to lights_out so it can talk to Mom
-        args=(lights_out_start, lights_out_end, mom_command_queue),
-    )
+    # 2. Lights Out Process (Optional)
+    if lights_out_start and lights_out_end:
+        lights_out_proc = multiprocessing.Process(
+            target=lights_out.main, 
+            args=(lights_out_start, lights_out_end, mom_command_queue) 
+        )
+        procs.append(lights_out_proc)
 
-    procs.extend([blacklist_checker, lights_out_proc])
+    # Start all background processes
     for p in procs:
         p.start()
 
@@ -90,8 +93,7 @@ def main():
     icon_thread.start()
 
     # Run Mom in the main process (blocking), passing the queue
-    mom.main(mom_command_queue)
-
+    mom.main(mom_command_queue, nagging_messages)
 
 if __name__ == "__main__":
     main()

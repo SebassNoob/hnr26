@@ -3,20 +3,6 @@ from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import Qt, QRectF, QPointF
 from PyQt6.QtGui import QPainter, QPainterPath, QColor, QFont, QPen, QFontMetrics
 
-# Constants matched from original bubble_window.py
-BUBBLE_PHRASES = [
-    "Have you eaten yet?",
-    "Drink some water.",
-    "Take a short stretch break.",
-    "Did you charge your laptop?",
-    "Posture check.",
-    "Are you still focused?",
-    "Stand up for a minute.",
-    "Plan your next task.",
-    "Take a deep breath.",
-    "Be kind to yourself.",
-]
-
 BUBBLE_FONT = "Consolas"
 BUBBLE_FONT_HEIGHT = 18  # Approx conversion from height 24 logfont
 BUBBLE_PAD_X = 14
@@ -31,7 +17,7 @@ TEXT_COLOR = QColor(0, 0, 0)
 
 
 class BubbleWidget(QWidget):
-    def __init__(self, parent_geometry=None):
+    def __init__(self, parent_geometry=None, messages=None):
         super().__init__()
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint
@@ -39,9 +25,10 @@ class BubbleWidget(QWidget):
             | Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-
+        
+        self.messages = messages if messages else ["Drink some water.", "Sit up straight."]
         self.phrase_index = 0
-        self.text = BUBBLE_PHRASES[0]
+        self.text = self.messages[0]
         self.tail_center_x = None  # If set, overrides standard offset
         self.target_geometry = parent_geometry  # The rect of the Mom window
 
@@ -51,8 +38,8 @@ class BubbleWidget(QWidget):
         self.font_obj.setBold(True)
 
     def advance_phrase(self):
-        self.phrase_index = (self.phrase_index + 1) % len(BUBBLE_PHRASES)
-        self.text = BUBBLE_PHRASES[self.phrase_index]
+        self.phrase_index = (self.phrase_index + 1) % len(self.messages)
+        self.text = self.messages[self.phrase_index]
         self.adjust_size_and_position()
         self.update()
 
