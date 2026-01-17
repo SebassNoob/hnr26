@@ -8,6 +8,7 @@ from PyQt6.QtGui import QPixmap, QPainter, QAction, QIcon, QMouseEvent
 
 from .bubble import BubbleWidget
 from .popup import PopupWidget
+import signal
 
 # Import SlipperOverlay directly so we can spawn it here
 from features.slipper.slipper import SlipperOverlay
@@ -200,8 +201,6 @@ class MomWidget(QWidget):
         QApplication.quit()
 
 def main(command_queue=None, messages=None):
-    import signal
-
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
     app = QApplication(sys.argv)
