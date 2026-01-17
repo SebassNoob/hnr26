@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 # --- Constants ---
 DEFAULT_MODEL = "groq/meta-llama/llama-4-scout-17b-16e-instruct" 
-CHECK_INTERVAL_SECONDS =  5*60  # 5 minutes
+CHECK_INTERVAL_SECONDS =  10  # 5 minutes
 
 def _load_env():
     # Correctly locate the .env file at the project root
@@ -131,5 +131,10 @@ def main(mom_queue=None):
                     "text": reply,
                     "score": score
                 })
+
+                if score < -0.3:  # Unproductive
+                    mom_queue.put({"type": "change_anger", "delta": 1})
+                elif score > 0.3:  # Productive
+                    mom_queue.put({"type": "change_anger", "delta": -1})
 
         time.sleep(CHECK_INTERVAL_SECONDS)

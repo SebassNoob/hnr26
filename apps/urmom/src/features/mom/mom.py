@@ -117,16 +117,32 @@ class MomWidget(QWidget):
             return "mom.png"
         elif self.anger == 2:
             return "mom_sad.png"
-        elif self.anger == 3:
+        elif self.anger >= 3:
             return "mom_angry.png"
         else:
             log("Invalid anger level, defaulting to neutral")
             return "mom.png"
 
     def update_anger(self, delta):
-        """Update the anger meter and change the sprite accordingly."""
+        """Update the anger meter. If it reaches 4, trigger slipper and reset to 3."""
         self.anger += delta
-        self.anger = max(0, min(3, self.anger))  # Clamp between 0 and 5
+        # --- CHANGE ---
+        # Clamp anger at 0, but allow it to increase past 3.
+        self.anger = max(0, self.anger)
+        log(f"Anger updated to: {self.anger}")
+
+        # Check for the slipper threshold
+        if self.anger >= 4:
+            log("Anger threshold reached! Throwing slipper.")
+            
+            # Trigger the slipper attack
+            self.overlay = SlipperOverlay(self)
+            self.overlay.show()
+            
+            # Reset anger back down to the "angry" state
+            self.anger = 3
+
+        # Update Mom's appearance based on the new anger level
         asset = self.get_anger_image()
         self.set_look(asset)
 
