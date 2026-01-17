@@ -6,8 +6,7 @@
     "dev": "turbo run dev",
     "dev:watch": "turbo run dev --parallel",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "format": "turbo run format"
   },
   "devDependencies": {
     "prettier": "^3.7.4",

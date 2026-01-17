@@ -1,7 +1,7 @@
 {
 	"name": "@shared/tooling",
 	"exports": {
-		"./biome": "./biome/base.json",
+		"./biome": "./biome/base.jsonc",
 		"./typescript": "./typescript/tsconfig.json"
 	},
 	"private": true,
