@@ -42,10 +42,6 @@ def main():
     # Start processes
     # pyqt6_proc = multiprocessing.Process(target=PLACEHOLDER_FOR_PYQT6_MAIN)
     # pyqt6_proc.start()
-    lights_out_checker = multiprocessing.Process(
-        target=shutdown.main, args=(lights_out_time, dev_mode)
-    )
-    lights_out_checker.start()
     blacklist_checker = multiprocessing.Process(
         target=blacklist.main, args=(blacklisted_processes, dev_mode)
     )

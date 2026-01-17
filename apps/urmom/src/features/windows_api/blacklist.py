@@ -5,35 +5,31 @@ def log(text):
     with open("log.txt", "a") as f:
         f.write(text + "\n")
 
-def check_for_blacklisted_process(blacklisted_processes: list[str]) -> list[int]:
-    blacklisted_pids = []
-    for proc in psutil.process_iter(["pid", "name"]):
+def find_and_kill_blacklisted_process(blacklisted_processes: list[str]) -> None:
+    log("Checking for blacklisted processes...")
+    for proc in psutil.process_iter(["pid", "name", "exe"]):
         for name in blacklisted_processes:
-            log(proc.info["name"].lower())
-            if proc.info["name"].lower() in name:
-                log("Found blacklisted process: " + proc.info["name"])
-                blacklisted_pids.append(int(proc.info["pid"]))
-    log(f"Blacklisted processes found: {blacklisted_pids}")
-    return blacklisted_pids
+            exe_lower = proc.info["exe"].lower() if proc.info["exe"] else ""
+            if name.lower() in exe_lower:
+                log(f"Found blacklisted process: {proc.info['exe']}")
+                terminate_blacklisted_process(proc.info["pid"], proc.info["name"], proc.info["exe"])
+    return None
 
 
-def terminate_blacklisted_processes(blacklisted_processes: list[int]) -> None:
-    for pid in blacklisted_processes:
-        try:
-            proc = psutil.Process(pid)
-            proc.terminate()
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            print("Could not terminate process with PID:", pid)
-            continue
+def terminate_blacklisted_process(pid: int, name: str, exe: str) -> None:
+    try:
+        log(f"Attempting to terminate process: {pid} {name} {exe}")
+        proc = psutil.Process(pid)
+        proc.terminate()
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        log(f"Could not terminate process with PID, name and exe: {pid, name, exe}")
 
 
 def main(blacklisted_processes: list[str], dev_mode) -> None:
     if dev_mode != '1':
         log("Blacklist process started with blacklisted processes: " + ", ".join(blacklisted_processes))
         while True:
-            running_blacklisted = check_for_blacklisted_process(blacklisted_processes)
-            if running_blacklisted != []:
-                terminate_blacklisted_processes(blacklisted_processes)
+            find_and_kill_blacklisted_process(blacklisted_processes)
             time.sleep(60)
 
 
