@@ -1,1 +1,1 @@
-from .mom import *
+from .mom import main
