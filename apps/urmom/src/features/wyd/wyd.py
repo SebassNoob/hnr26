@@ -6,11 +6,13 @@ import json
 from litellm import completion
 from PIL import ImageGrab
 from utils.env import load_env
+from utils import log
 
 # --- Constants ---
-DEFAULT_MODEL = "groq/meta-llama/llama-4-scout-17b-16e-instruct" 
-CHECK_INTERVAL_SECONDS =  5 * 60  # 5 minutes
+DEFAULT_MODEL = "groq/meta-llama/llama-4-scout-17b-16e-instruct"
+CHECK_INTERVAL_SECONDS = 5 * 60  # 5 minutes
 ANIMATION_DELAY_SECONDS = 2
+
 
 def take_screenshot():
     """Takes a screenshot and returns the path to a temporary file."""
@@ -23,13 +25,15 @@ def take_screenshot():
         screenshot.save(temp_path, "JPEG")
         return temp_path
     except Exception as e:
-        print(f"WYD Error taking screenshot: {e}")
+        log(f"WYD Error taking screenshot: {e}")
         return None
+
 
 def encode_image(image_path):
     """Encodes an image file to a base64 string."""
     with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
+        return base64.b64encode(image_file.read()).decode("utf-8")
+
 
 def analyze_activity(image_path, model=DEFAULT_MODEL):
     """
@@ -56,71 +60,75 @@ def analyze_activity(image_path, model=DEFAULT_MODEL):
         return None
 
     try:
-        print("WYD: Analyzing screenshot...")
+        log("WYD: Analyzing screenshot...")
         response = completion(
             model=model,
             messages=[
-                {
-                    "role": "system", "content": system_prompt
-                },
+                {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
                     "content": [
-                        {"type": "text", "text": "What is my child doing? Are they being productive?"},
+                        {
+                            "type": "text",
+                            "text": "What is my child doing? Are they being productive?",
+                        },
                         {
                             "type": "image_url",
-                            "image_url": { "url": f"data:image/jpeg;base64,{base64_image}" }
-                        }
-                    ]
-                }
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}"
+                            },
+                        },
+                    ],
+                },
             ],
             response_format={"type": "json_object"},
         )
-        print("WYD: Received analysis:")
+        log("WYD: Received analysis:")
         data = json.loads(response.choices[0].message.content)
-        print(data)
+        log(str(data))
         return data
 
     except Exception as e:
-        print(f"WYD Error calling AI: {e}")
+        log(f"WYD Error calling AI: {e}")
         return None
     finally:
         # Clean up the temporary screenshot file
         if os.path.exists(image_path):
             os.remove(image_path)
 
+
 def main(mom_queue=None):
     load_env()
     if not os.environ.get("GROQ_API_KEY"):
-        print("⚠️ WYD: GROQ_API_KEY not found in environment. This feature will be disabled.")
+        log(
+            "⚠️ WYD: GROQ_API_KEY not found in environment. This feature will be disabled."
+        )
         return
-        
-    print("👀 WYD Manager started. Checking screen every 5 minutes.")
-    
+
+    log("👀 WYD Manager started. Checking screen every 5 minutes.")
+
     while True:
         # 1. Tell Mom to get ready for the picture
         if mom_queue:
-            print("WYD: Telling Mom to take a picture.")
+            log("WYD: Telling Mom to take a picture.")
             mom_queue.put({"type": "prepare_for_screenshot"})
-            time.sleep(ANIMATION_DELAY_SECONDS) # Give animation time to play
+            time.sleep(ANIMATION_DELAY_SECONDS)  # Give animation time to play
 
         # 2. Take the screenshot and analyze it
         screenshot_path = take_screenshot()
         analysis = None
         if screenshot_path:
             analysis = analyze_activity(screenshot_path)
-        
+
         # 3. Send the analysis results back to Mom
         if analysis and mom_queue:
             reply = analysis.get("reply")
             score = analysis.get("score")
-            
+
             if reply is not None and score is not None:
-                mom_queue.put({
-                    "type": "show_bubble_message",
-                    "text": reply,
-                    "score": score
-                })
+                mom_queue.put(
+                    {"type": "show_bubble_message", "text": reply, "score": score}
+                )
                 if score < -0.3:
                     mom_queue.put({"type": "change_anger", "delta": 1})
                 elif score > 0.3:
