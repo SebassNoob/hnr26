@@ -51,6 +51,20 @@ class MomWidget(QWidget):
         self.audio_output_camera.setVolume(1.0)
         # ------------------------------
 
+        self.dragging = False
+        self.drag_start_position = QPoint()
+        self.bubble = None
+        self.popups = []
+
+        # 1. Chair Reminder (Sit up straight)
+        QTimer.singleShot(30 * 1000, self.start_chair_reminders) # 0.5 min delay
+
+        # 2. Water Reminder
+        QTimer.singleShot(60 * 1000, self.start_water_reminders) # 1 min delay
+
+        # 3. Grass Reminder (Take a break)
+        QTimer.singleShot(120 * 1000, self.start_grass_reminders) # 2 min delay
+
         # Window Setup
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
@@ -291,6 +305,49 @@ class MomWidget(QWidget):
         # Simple random position for brevity
         popup.move(random.randint(0, max_x), random.randint(0, max_y))
         popup.show()
+        self.popups.append(popup)
+    
+    def cleanup_popups(self):
+        """Removes references to closed popups to save memory."""
+        self.popups = [p for p in self.popups if p.isVisible()]
+
+    def start_chair_reminders(self):
+        """Spawns the first chair popup and starts the recurring timer."""
+        self.spawn_chair_popup()
+        self.chair_timer = QTimer(self)
+        self.chair_timer.timeout.connect(self.spawn_chair_popup)
+        self.chair_timer.start(30 * 60 * 1000) # Every 30 mins
+
+    def start_water_reminders(self):
+        """Spawns the first water popup and starts the recurring timer."""
+        self.spawn_water_popup()
+        self.water_timer = QTimer(self)
+        self.water_timer.timeout.connect(self.spawn_water_popup)
+        self.water_timer.start(60 * 60 * 1000) # Every 1 hour
+
+    def start_grass_reminders(self):
+        """Spawns the first grass popup and starts the recurring timer."""
+        self.spawn_grass_popup()
+        self.grass_timer = QTimer(self)
+        self.grass_timer.timeout.connect(self.spawn_grass_popup)
+        self.grass_timer.start(30 * 60 * 1000) # Every 30 mins
+
+    def spawn_chair_popup(self):
+        self.cleanup_popups()
+        popup = PopupWidget("chair.png", "Did you fix your posture?", "I've sat up straight")
+        popup.show_randomly()
+        self.popups.append(popup)
+
+    def spawn_water_popup(self):
+        self.cleanup_popups()
+        popup = PopupWidget("water.png", "Time for some water!", "I've drank water")
+        popup.show_randomly()
+        self.popups.append(popup)
+
+    def spawn_grass_popup(self):
+        self.cleanup_popups()
+        popup = PopupWidget("grass.png", "Go touch some grass.", "I've taken a break")
+        popup.show_randomly()
         self.popups.append(popup)
 
     def quit_app(self):

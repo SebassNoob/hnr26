@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 # --- Constants ---
 DEFAULT_MODEL = "groq/meta-llama/llama-4-scout-17b-16e-instruct" 
-CHECK_INTERVAL_SECONDS =  10  # 5 minutes
+CHECK_INTERVAL_SECONDS =  5 * 60  # 5 minutes
 ANIMATION_DELAY_SECONDS = 2
 
 def _load_env():
