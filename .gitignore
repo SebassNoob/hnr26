@@ -53,3 +53,4 @@ uv.lock
 dist-electron/
 release/
 dev_mode.txt
+log.txt

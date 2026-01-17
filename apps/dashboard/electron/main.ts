@@ -27,14 +27,14 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
 	? path.join(process.env.APP_ROOT, "public")
 	: RENDERER_DIST;
 
-const formatZodIssues = (issues: z.ZodIssue[]) =>
+const formatZodIssues = (issues: z.core.$ZodIssue[]) =>
 	issues.map((issue) => `${issue.path.join(".") || "config"}: ${issue.message}`).join("; ");
 
 let win: BrowserWindow | null;
 
 function createWindow() {
 	win = new BrowserWindow({
-		icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+		icon: path.join(process.env.VITE_PUBLIC, "mom.png"),
 		webPreferences: {
 			preload: path.join(__dirname, "preload.mjs"),
 		},
@@ -188,50 +188,32 @@ ipcMain.handle("execute-urmom", async (_event, args: string[] = []) => {
 			};
 		}
 
-		// Execute the binary
+		// Execute the binary (fire-and-forget so UI can close immediately)
 		const child = spawn(urmomPath, args, {
-			detached: false,
-			stdio: ["ignore", "pipe", "pipe"],
+			detached: true,
+			stdio: "ignore",
 		});
 
-		let stdout = "";
-		let stderr = "";
+		child.unref();
 
-		child.stdout?.on("data", (data) => {
-			stdout += data.toString();
-		});
-
-		child.stderr?.on("data", (data) => {
-			stderr += data.toString();
-		});
-
-		// Return immediately with the process info
-		// You can also wait for the process to complete if needed
-		return new Promise((resolve) => {
-			child.on("close", (code) => {
-				console.info(`urmom.exe exited with code ${code}`);
-				resolve({
-					success: code === 0,
-					code,
-					stdout,
-					stderr,
-					path: urmomPath,
-				});
-			});
-
-			child.on("error", (error) => {
-				console.error("Error executing urmom.exe:", error);
-				resolve({
-					success: false,
-					error: String(error),
-					path: urmomPath,
-				});
-			});
-		});
+		return {
+			success: true,
+			pid: child.pid,
+			path: urmomPath,
+		};
 	} catch (error) {
 		console.error("Error in execute-urmom handler:", error);
 		return { success: false, error: String(error) };
 	}
+});
+
+ipcMain.handle("close-window", () => {
+	if (win) {
+		win.close();
+		return { success: true };
+	}
+
+	return { success: false, error: "No window to close" };
 });
 
 app.whenReady().then(createWindow);
