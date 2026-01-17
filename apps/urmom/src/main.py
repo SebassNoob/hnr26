@@ -1,4 +1,4 @@
-from features import food
+from features import mom
 from features import shutdown
 from features import blacklist
 from features import bargain
@@ -35,7 +35,7 @@ def main():
     # )
     # blacklist_checker.start()
     # print("Hello from urmom!")
-    food.main()
+    mom.main()
 
 if __name__ == "__main__":
     main()
