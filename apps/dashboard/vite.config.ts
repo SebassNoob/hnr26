@@ -29,4 +29,9 @@ export default defineConfig({
 		}),
 		tailwindcss(),
 	],
+	resolve: {
+		alias: {
+			"@shared/ui": path.resolve(__dirname, "../../packages/ui/components"),
+		},
+	},
 });
