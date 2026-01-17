@@ -2,6 +2,7 @@ import sys
 import os
 import random
 import queue  # For the Empty exception
+from utils import log
 from PyQt6.QtWidgets import QApplication, QWidget, QMenu
 from PyQt6.QtCore import Qt, QTimer, QPoint, QRect, QUrl
 from PyQt6.QtGui import QPixmap, QPainter, QAction, QIcon, QMouseEvent, QTransform
@@ -39,7 +40,7 @@ class MomWidget(QWidget):
         self.command_queue = command_queue
         self.messages = messages
         self.original_messages = messages if messages else ["Drink some water.", "Sit up straight."]
-        self.anger = 0  # Anger meter, 0 = normal, higher = angrier
+        self.anger = 1  # Anger meter, 1 = normal, higher = angrier
         self.is_animating = False # Flag to prevent animations from overlapping
 
         # --- Audio Setup for Camera ---
@@ -245,8 +246,6 @@ class MomWidget(QWidget):
             self.dragging = True
             self.drag_start_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             event.accept()
-        elif event.button() == Qt.MouseButton.RightButton:
-            self.close()
 
     def mouseMoveEvent(self, event: QMouseEvent):
         if self.dragging and event.buttons() & Qt.MouseButton.LeftButton:

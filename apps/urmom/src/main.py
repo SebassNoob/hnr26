@@ -74,13 +74,19 @@ def main():
     # Prepare processes list
     procs = []
 
-    # 1. Blacklist Process
+    # 1. Mom Process
+    mom_proc = multiprocessing.Process(
+        target=mom.main, args=(mom_command_queue, nagging_messages)
+    )
+    procs.append(mom_proc)
+
+    # 2. Blacklist Process
     blacklist_checker = multiprocessing.Process(
         target=blacklist.main, args=(blacklisted_processes, dev_mode, mom_command_queue)
     )
     procs.append(blacklist_checker)
 
-    # 2. Lights Out Process (Optional)
+    # 3. Lights Out Process (Optional)
     if lights_out_start and lights_out_end:
         lights_out_proc = multiprocessing.Process(
             target=lights_out.main, 
@@ -103,9 +109,6 @@ def main():
     icon = tray.create_icon(cleanup_generator(procs))
     icon_thread = threading.Thread(target=icon.run)
     icon_thread.start()
-
-    # Run Mom in the main process (blocking), passing the queue
-    mom.main(mom_command_queue, nagging_messages)
 
 if __name__ == "__main__":
     main()
