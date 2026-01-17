@@ -15,7 +15,7 @@ export function About() {
 				<ul className="list-disc list-inside mt-2 text-gray-600 dark:text-gray-400">
 					<li>Closes irrelevant apps</li>
 					<li>Schedule "lights out" time to force shutdown your computer.</li>
-          <li>Nags at you.</li>
+					<li>Nags at you.</li>
 				</ul>
 			</div>
 
