@@ -14,21 +14,22 @@ def check_for_lights_out(lights_out_time):
     return current_time >= lights_out_time
 """
 
-def shutdown_computer():
-    shutdown_message = "EH WHAT TIME ALREADY? GO TO SLEEP LA TOMORROW YOU CANNOT WAKE UP HOW. I GIVE YOU 30 SECONDS"
+def shutdown_computer(dev_mode):
+    if dev_mode !='1':
+        shutdown_message = "EH WHAT TIME ALREADY? GO TO SLEEP LA TOMORROW YOU CANNOT WAKE UP HOW. I GIVE YOU 30 SECONDS"
 
-    # Check permissions
-    flags = win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY
-    token = win32security.OpenProcessToken(win32api.GetCurrentProcess(), flags)
-    privilege_id = win32security.LookupPrivilegeValue(
-        None, win32security.SE_SHUTDOWN_NAME
-    )
-    # Set permission to shutdown
-    win32security.AdjustTokenPrivileges(
-        token, 0, [(privilege_id, win32security.SE_PRIVILEGE_ENABLED)]
-    )
-    # Shutdown
-    win32api.InitiateSystemShutdown(None, shutdown_message, 30, False, False)
+        # Check permissions
+        flags = win32security.TOKEN_ADJUST_PRIVILEGES | win32security.TOKEN_QUERY
+        token = win32security.OpenProcessToken(win32api.GetCurrentProcess(), flags)
+        privilege_id = win32security.LookupPrivilegeValue(
+            None, win32security.SE_SHUTDOWN_NAME
+        )
+        # Set permission to shutdown
+        win32security.AdjustTokenPrivileges(
+            token, 0, [(privilege_id, win32security.SE_PRIVILEGE_ENABLED)]
+        )
+        # Shutdown
+        win32api.InitiateSystemShutdown(None, shutdown_message, 30, False, False)
 
 
 def main(lights_out_time, dev_mode):
