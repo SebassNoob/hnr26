@@ -24,6 +24,7 @@
 		"@biomejs/biome": "^2.3.0"
 	},
 	"exports": {
+		".": "./src/components",
 		"./components": "./src/components",
 		"./hooks": "./src/hooks",
 		"./providers": "./src/providers"

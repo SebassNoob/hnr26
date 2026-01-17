@@ -1,7 +1,6 @@
 import { app, BrowserWindow, ipcMain, dialog } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { allowedExecutableExtensions } from "../src/app/Configuration";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -66,18 +65,35 @@ app.on("activate", () => {
 	}
 });
 
-
-
+// IPC Handlers
 ipcMain.handle("select-file", async () => {
 	try {
 		const result = await dialog.showOpenDialog({
 			properties: ["openFile"],
-				filters: [
-					{ name: "Executables", extensions: allowedExecutableExtensions },
-					{ name: "All Files", extensions: ["*"] }
-				]
+			filters: [
+				{
+					name: "Executables",
+					extensions: [
+						"exe",
+						"bat",
+						"cmd",
+						"sh",
+						"app",
+						"jar",
+						"py",
+						"pl",
+						"rb",
+						"com",
+						"scr",
+						"pif",
+						"cpl",
+						"msc",
+					],
+				},
+				{ name: "All Files", extensions: ["*"] },
+			],
 		});
-		
+
 		if (!result.canceled && result.filePaths.length > 0) {
 			return result.filePaths[0];
 		}
@@ -85,6 +101,33 @@ ipcMain.handle("select-file", async () => {
 	} catch (error) {
 		console.error("Error selecting file:", error);
 		return null;
+	}
+});
+
+ipcMain.handle("save-config", async (_event, config) => {
+	try {
+		const fs = await import("node:fs/promises");
+		const configPath = path.join(app.getPath("userData"), "config.json");
+		await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
+		console.log("Config saved to:", configPath);
+		return { success: true, path: configPath };
+	} catch (error) {
+		console.error("Error saving config:", error);
+		return { success: false, error: String(error) };
+	}
+});
+
+ipcMain.handle("load-config", async () => {
+	try {
+		const fs = await import("node:fs/promises");
+		const configPath = path.join(app.getPath("userData"), "config.json");
+		const data = await fs.readFile(configPath, "utf-8");
+		const config = JSON.parse(data);
+		console.log("Config loaded from:", configPath);
+		return { success: true, data: config };
+	} catch (error) {
+		console.error("Error loading config:", error);
+		return { success: false, error: String(error) };
 	}
 });
 
