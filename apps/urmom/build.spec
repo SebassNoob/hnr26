@@ -1,15 +1,20 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import sys
+import os
 
 # Check for dev build flag
-dev_build = '--dev' in sys.argv
+dev_build = os.environ.get('DEV_BUILD') == '1'
+
+datas = []
+if dev_build:
+    datas.append(('dev_mode.txt', '.'))
 
 a = Analysis(
     ['src/main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=datas,
     hiddenimports=['win32api', 'win32timezone', 'win32security', 'win32con', 'psutil'],
     hookspath=[],
     hooksconfig={},

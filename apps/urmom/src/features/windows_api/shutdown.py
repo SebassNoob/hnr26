@@ -3,14 +3,16 @@ import win32security
 import datetime
 import time
 
-
+def log(text):
+    with open("log.txt", "a") as f:
+        f.write(text + "\n")
+"""
 def check_for_lights_out(lights_out_time):
-    current_time = datetime.datetime.now()
-    """
-    formatting to be done...
-    """
+    current_time = datetime.datetime.now().time()
+    lights_out_time = datetime.datetime.strptime(lights_out_time.strip("T"), "%H:%M:%S").time()
+    log(f"Current time: {current_time}, Lights out time: {lights_out_time}")
     return current_time >= lights_out_time
-
+"""
 
 def shutdown_computer():
     shutdown_message = "EH WHAT TIME ALREADY? GO TO SLEEP LA TOMORROW YOU CANNOT WAKE UP HOW. I GIVE YOU 30 SECONDS"
@@ -29,11 +31,16 @@ def shutdown_computer():
     win32api.InitiateSystemShutdown(None, shutdown_message, 30, False, False)
 
 
-def main(lights_out_time):
+def main(lights_out_time, dev_mode):
+    pass
+    """
+    log("Shutdown process started with lights out time: " + lights_out_time)
     while True:
         if check_for_lights_out(lights_out_time):
-            shutdown_computer()
+            if dev_mode !='1':
+                shutdown_computer()
         time.sleep(60)
+    """
 
 
 if __name__ == "__main__":
