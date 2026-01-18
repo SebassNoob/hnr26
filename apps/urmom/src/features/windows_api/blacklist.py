@@ -13,7 +13,7 @@ def find_and_kill_blacklisted_process(blacklisted_processes: list[str], mom_queu
                 if mom_queue:
                     try:
                         mom_queue.put({"type": "show_blacklist_message", "process": proc.info["name"]})
-                        mom_queue.put({"type": "change_anger", "delta": -1})
+                        mom_queue.put({"type": "change_anger", "delta": 1})
                     except Exception as e:
                         log(f"Failed to send message to mom: {e}")
                 terminate_blacklisted_process(

@@ -6,12 +6,22 @@ import os
 # --- FIX IMPORT ---
 from PyInstaller.utils.hooks import collect_all
 
+python_dll_path = os.path.join(sys.prefix, 'DLLs')
+ssl_binaries = []
+# The exact filenames may vary slightly with Python versions, but these are
+# standard for recent Python 3.x on Windows.
+openssl_dlls = ['libcrypto-3-x64.dll', 'libssl-3-x64.dll'] 
+for dll in openssl_dlls:
+    source_path = os.path.join(python_dll_path, dll)
+    if os.path.exists(source_path):
+        ssl_binaries.append((source_path, '.')) # Copies DLL to the bundle's root
+
 # Check for dev build flag
 dev_build = os.environ.get('DEV_BUILD') == '1'
 
 # Initialize lists
 datas = []
-binaries = []
+binaries = ssl_binaries
 hiddenimports = ['_ssl', 'win32api', 'win32timezone', 'win32security', 'win32con', 'psutil', 'tiktoken_ext', 'tiktoken_ext.openai_public']
 
 # --- FIX: Collect all litellm files/dependencies ---
