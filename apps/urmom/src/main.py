@@ -63,7 +63,7 @@ def main():
     blacklisted_processes = Validation.validate_non_empty_list(
         json_args["blacklistedProcesses"]
     )
-    screenshot_frequency_minutes = Validation.validate_positive_int(json_args["screenshotFrequencyMinutes"])
+    screenshot_frequency_minutes = Validation.validate_positive_int(json_args["screenshotFreqMin"])
     
     # Create a queue for sending commands to the Mom process
     mom_command_queue = multiprocessing.Queue()
