@@ -44,6 +44,7 @@ class PopupWidget(QWidget):
                 border-radius: 4px;
                 padding: 8px;
                 font-family: 'Consolas';
+                color: black;
             }
             QPushButton:hover {
                 background-color: #e0e0e0;

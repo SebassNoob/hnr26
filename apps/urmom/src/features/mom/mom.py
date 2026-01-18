@@ -38,8 +38,8 @@ class MomWidget(QWidget):
         _instance = self
         
         self.command_queue = command_queue
-        self.messages = messages
-        self.original_messages = messages if messages else ["Drink some water.", "Sit up straight."]
+        self.messages = list(messages) if messages else ["Drink some water.", "Sit up straight."]
+        self.original_messages = list(self.messages)
         self.anger = 1  # Anger meter, 1 = normal, higher = angrier
         self.is_animating = False # Flag to prevent animations from overlapping
 
@@ -290,7 +290,7 @@ class MomWidget(QWidget):
 
     def show_bubble(self, text=None, score=None):
         if not self.bubble:
-            self.bubble = BubbleWidget(self.geometry())
+            self.bubble = BubbleWidget(self.geometry(), self.messages)
         
         # If text and score are provided, it's a WYD message
         if text is not None and score is not None:
