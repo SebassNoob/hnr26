@@ -12,7 +12,7 @@ dev_build = os.environ.get('DEV_BUILD') == '1'
 # Initialize lists
 datas = []
 binaries = []
-hiddenimports = ['_ssl', 'win32api', 'win32timezone', 'win32security', 'win32con', 'psutil', 'tiktoken']
+hiddenimports = ['_ssl', 'win32api', 'win32timezone', 'win32security', 'win32con', 'psutil', 'tiktoken_ext', 'tiktoken_ext.openai_public']
 
 # --- FIX: Collect all litellm files/dependencies ---
 # This grabs the missing tokenizers and core utils
