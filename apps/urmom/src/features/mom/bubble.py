@@ -34,6 +34,7 @@ class BubbleWidget(QWidget):
         
         self.tail_center_x = None  # If set, overrides standard offset
         self.target_geometry = parent_geometry # The rect of the Mom window
+        self.target_point = None  # Screen-space point to aim the tail at
         
         # Font setup
         self.font_obj = QFont(BUBBLE_FONT)
@@ -60,6 +61,11 @@ class BubbleWidget(QWidget):
 
     def set_target_geometry(self, rect):
         self.target_geometry = rect
+        self.target_point = None
+        self.adjust_size_and_position()
+
+    def set_target_point(self, point):
+        self.target_point = point
         self.adjust_size_and_position()
 
     def adjust_size_and_position(self):
@@ -90,11 +96,19 @@ class BubbleWidget(QWidget):
         screen = self.screen().geometry()
         margin = 16
 
-        if self.target_geometry:
-            # Position above Mom
+        if self.target_point:
+            # Position above Mom's head
+            head_x = self.target_point.x()
+            head_y = self.target_point.y()
+        elif self.target_geometry:
+            # Fallback: position above Mom's center
             head_x = self.target_geometry.x() + (self.target_geometry.width() // 2)
-            head_y = self.target_geometry.y() + 20 
-            
+            head_y = self.target_geometry.y() + 20
+        else:
+            head_x = None
+            head_y = None
+
+        if head_x is not None and head_y is not None:
             bx = head_x - (self.bubble_w // 2)
             by = head_y - self.bubble_h - 10
             
