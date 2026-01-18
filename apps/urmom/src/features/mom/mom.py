@@ -24,6 +24,8 @@ ICON_FILENAME = "mom.ico"
 MOM_SCALE = 1.4
 POPUP_INTERVAL_MS = 5000 * 60 * 3
 SCREEN_EDGE_MARGIN = 16
+HEAD_ANCHOR_X_RATIO = 0.5
+HEAD_ANCHOR_Y_RATIO = 0.22
 
 _instance = None
 
@@ -86,13 +88,19 @@ class MomWidget(QWidget):
         # State
         self.dragging = False
         self.drag_start_position = QPoint()
-        self.bubble = None
+        self.bubble = BubbleWidget(self.geometry(), self.messages)
+        self.bubble.hide()
         self.popups = []
 
         # Popup Timer
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.spawn_popup)
         self.timer.start(POPUP_INTERVAL_MS)
+
+        # Keep bubble tail locked to head position
+        self.head_track_timer = QTimer(self)
+        self.head_track_timer.timeout.connect(self.update_bubble_target)
+        self.head_track_timer.start(100)
 
         # --- IPC Polling Timer ---
         if self.command_queue:
@@ -164,7 +172,7 @@ class MomWidget(QWidget):
         self.anger += delta
         # --- CHANGE ---
         # Clamp anger at 0, but allow it to increase past 3.
-        self.anger = max(0, min(4, self.anger))
+        self.anger = max(-1, min(4, self.anger))
         log(f"Anger updated to: {self.anger}")
 
         # Check for the slipper threshold
@@ -191,7 +199,7 @@ class MomWidget(QWidget):
             self.bubble.messages = [message]
             self.bubble.phrase_index = 0
             self.bubble.text = message
-        self.bubble.set_target_geometry(self.geometry())
+        self.bubble.set_target_point(self.get_head_point())
         self.bubble.show()
         self.bubble.activateWindow()
         # Restore original messages after 5 seconds
@@ -278,13 +286,28 @@ class MomWidget(QWidget):
             self.show_bubble()
 
     def moveEvent(self, event):
-        if self.bubble and self.bubble.isVisible():
-            self.bubble.set_target_geometry(self.geometry())
+        if self.bubble:
+            self.bubble.set_target_point(self.get_head_point())
         super().moveEvent(event)
+
+    def resizeEvent(self, event):
+        if self.bubble:
+            self.bubble.set_target_point(self.get_head_point())
+        super().resizeEvent(event)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Escape:
             self.close()
+
+    def get_head_point(self):
+        geom = self.geometry()
+        head_x = geom.x() + int(geom.width() * HEAD_ANCHOR_X_RATIO)
+        head_y = geom.y() + int(geom.height() * HEAD_ANCHOR_Y_RATIO)
+        return QPoint(head_x, head_y)
+
+    def update_bubble_target(self):
+        if self.bubble:
+            self.bubble.set_target_point(self.get_head_point())
 
     def show_bubble(self, text=None, score=None):
         if not self.bubble:
@@ -297,7 +320,7 @@ class MomWidget(QWidget):
         else:
             self.bubble.advance_phrase()
 
-        self.bubble.set_target_geometry(self.geometry())
+        self.bubble.set_target_point(self.get_head_point())
         self.bubble.show()
         self.bubble.activateWindow()
 
