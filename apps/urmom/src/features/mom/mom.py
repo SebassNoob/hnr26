@@ -1,6 +1,7 @@
 import sys
 import random
 import queue  # For the Empty exception
+import threading
 from pydub import AudioSegment
 from pydub.playback import play
 from utils import log
@@ -157,7 +158,7 @@ class MomWidget(QWidget):
         for i in range(3):
             sound_file = random.choice(sounds)
             sound = AudioSegment.from_file(sound_file, format="mp3")
-            play(sound)
+            threading.Thread(target=play, args=(sound,), daemon=True).start()
 
     def update_anger(self, delta):
         """Update the anger meter. If it reaches 4, trigger slipper and reset to 3."""
@@ -194,6 +195,7 @@ class MomWidget(QWidget):
         self.bubble.set_target_geometry(self.geometry())
         self.bubble.show()
         self.bubble.activateWindow()
+        self.mumble()
         # Restore original messages after 5 seconds
         QTimer.singleShot(5000, self.restore_bubble_messages)
 
@@ -300,6 +302,7 @@ class MomWidget(QWidget):
         self.bubble.set_target_geometry(self.geometry())
         self.bubble.show()
         self.bubble.activateWindow()
+        self.mumble()
 
     def spawn_popup(self):
         self.popups = [p for p in self.popups if p.isVisible()]
