@@ -17,7 +17,7 @@ BUBBLE_BORDER = QColor(0, 0, 0)
 TEXT_COLOR = QColor(0, 0, 0)
 
 class BubbleWidget(QWidget):
-    def __init__(self, parent_geometry=None):
+    def __init__(self, parent_geometry=None, messages=None):
         super().__init__()
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
@@ -25,8 +25,10 @@ class BubbleWidget(QWidget):
             Qt.WindowType.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        
-        self.text = "Have you eaten yet?"
+
+        self.messages = messages if messages else ["Have you eaten yet?"]
+        self.phrase_index = 0
+        self.text = self.messages[0] if self.messages else "Don't poke me."
         self.is_wyd_message = False
         self.score = 0.0
         
@@ -39,9 +41,13 @@ class BubbleWidget(QWidget):
         self.font_obj.setBold(True)
 
     def advance_phrase(self):
-        # This is now just a fallback when clicking mom
+        # Cycle through nagging messages when clicking mom
         self.is_wyd_message = False
-        self.text = "Don't poke me."
+        if self.messages:
+            self.text = self.messages[self.phrase_index % len(self.messages)]
+            self.phrase_index += 1
+        else:
+            self.text = "Don't poke me."
         self.adjust_size_and_position()
         self.update()
 

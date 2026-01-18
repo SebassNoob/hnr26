@@ -1,7 +1,9 @@
 import sys
-import os
 import random
 import queue  # For the Empty exception
+import threading
+from pydub import AudioSegment
+from pydub.playback import play
 from utils import log
 from PyQt6.QtWidgets import QApplication, QWidget, QMenu
 from PyQt6.QtCore import Qt, QTimer, QPoint, QRect, QUrl
@@ -11,8 +13,6 @@ from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from .bubble import BubbleWidget
 from .popup import PopupWidget
 import signal
-
-from utils import log
 
 # Import SlipperOverlay directly so we can spawn it here
 from features.slipper.slipper import SlipperOverlay 
@@ -38,8 +38,8 @@ class MomWidget(QWidget):
         _instance = self
         
         self.command_queue = command_queue
-        self.messages = messages
-        self.original_messages = messages if messages else ["Drink some water.", "Sit up straight."]
+        self.messages = list(messages) if messages else ["Drink some water.", "Sit up straight."]
+        self.original_messages = list(self.messages)
         self.anger = 1  # Anger meter, 1 = normal, higher = angrier
         self.is_animating = False # Flag to prevent animations from overlapping
 
@@ -153,6 +153,13 @@ class MomWidget(QWidget):
             log("Invalid anger level, defaulting to neutral")
             return "mom.png"
 
+    def mumble(self):
+        sounds = [get_asset_path(f"fem{i}.mp3") for i in range(1, 3)]
+        for i in range(3):
+            sound_file = random.choice(sounds)
+            sound = AudioSegment.from_file(sound_file, format="mp3")
+            threading.Thread(target=play, args=(sound,), daemon=True).start()
+
     def update_anger(self, delta):
         """Update the anger meter. If it reaches 4, trigger slipper and reset to 3."""
         self.anger += delta
@@ -188,6 +195,7 @@ class MomWidget(QWidget):
         self.bubble.set_target_geometry(self.geometry())
         self.bubble.show()
         self.bubble.activateWindow()
+        self.mumble()
         # Restore original messages after 5 seconds
         QTimer.singleShot(5000, self.restore_bubble_messages)
 
@@ -282,7 +290,7 @@ class MomWidget(QWidget):
 
     def show_bubble(self, text=None, score=None):
         if not self.bubble:
-            self.bubble = BubbleWidget(self.geometry())
+            self.bubble = BubbleWidget(self.geometry(), self.messages)
         
         # If text and score are provided, it's a WYD message
         if text is not None and score is not None:
@@ -294,6 +302,7 @@ class MomWidget(QWidget):
         self.bubble.set_target_geometry(self.geometry())
         self.bubble.show()
         self.bubble.activateWindow()
+        self.mumble()
 
     def spawn_popup(self):
         self.popups = [p for p in self.popups if p.isVisible()]
