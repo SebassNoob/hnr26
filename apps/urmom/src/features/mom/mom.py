@@ -360,7 +360,7 @@ def main(command_queue=None, messages=None):
     app.setQuitOnLastWindowClosed(False)
     
     # Pass queue to widget
-    window = MomWidget(command_queue)
+    window = MomWidget(command_queue, messages)
     window.show()
     
     sys.exit(app.exec())
