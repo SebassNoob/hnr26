@@ -1,8 +1,8 @@
 import json
 import os
-from litellm import completion
+from groq import Groq
 
-DEFAULT_MODEL = "huggingface/together/meta-llama/Llama-3.2-3B-Instruct"
+DEFAULT_MODEL = "llama-3.1-8b-instant"
 
 def negotiate_time(user_excuse: str, model=DEFAULT_MODEL):
     system_prompt = """
@@ -25,7 +25,8 @@ def negotiate_time(user_excuse: str, model=DEFAULT_MODEL):
 
     try:
         print("submitting excuse: ", user_excuse)
-        response = completion(
+        client = Groq()
+        response = client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -55,11 +56,11 @@ def main():
     print("--- STARTING MOM TEST ---")
 
     # 1. Check for API Keys (Quick helper for testing)
-    if "HUGGINGFACE_API_KEY" not in os.environ and "OPENAI_API_KEY" not in os.environ:
+    if "GROQ_API_KEY" not in os.environ and "OPENAI_API_KEY" not in os.environ:
         print("⚠️  WARNING: No API Key found.")
-        key = input("Enter HuggingFace API Key for this test: ")
+        key = input("Enter GROQ API Key for this test: ")
         if key.strip():
-            os.environ["HUGGINGFACE_API_KEY"] = key.strip()
+            os.environ["GROQ_API_KEY"] = key.strip()
         else:
             print("No key provided. This will likely fail.")
 

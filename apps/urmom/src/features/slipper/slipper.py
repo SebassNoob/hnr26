@@ -117,7 +117,7 @@ class SlipperOverlay(QWidget):
                 self.launch_y + (self.center_y - self.launch_y) * self.throw_progress
             )
 
-            scale = 0.5 + (2.5 * self.throw_progress)
+            scale = 0.5 + (5.5 * self.throw_progress)
 
             t = QTransform()
             t.translate(cur_x, cur_y)

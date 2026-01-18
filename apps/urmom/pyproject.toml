@@ -13,7 +13,7 @@ dependencies = [
     "pillow>=12.1.0",
     "litellm>=1.80.17",
     "pystray>=0.19.5",
-    "pydub>=0.25.1",
+    "groq>=1.0.0",
 ]
 
 [project.optional-dependencies]

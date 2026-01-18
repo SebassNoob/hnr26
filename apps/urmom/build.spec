@@ -3,8 +3,6 @@ from PyInstaller.utils.hooks import collect_data_files
 
 import sys
 import os
-# --- FIX IMPORT ---
-from PyInstaller.utils.hooks import collect_all
 
 # Check for dev build flag
 dev_build = os.environ.get('DEV_BUILD') == '1'
@@ -12,15 +10,8 @@ dev_build = os.environ.get('DEV_BUILD') == '1'
 # Initialize lists
 datas = []
 binaries = []
-hiddenimports = ['_ssl', 'win32api', 'win32timezone', 'win32security', 'win32con', 'psutil', 'tiktoken_ext', 'tiktoken_ext.openai_public']
+hiddenimports = ['_ssl', 'win32api', 'win32timezone', 'win32security', 'win32con', 'psutil', 'groq']
 
-# --- FIX: Collect all litellm files/dependencies ---
-# This grabs the missing tokenizers and core utils
-lm_datas, lm_binaries, lm_hidden = collect_all('litellm')
-datas += lm_datas
-binaries += lm_binaries
-hiddenimports += lm_hidden
-# ---------------------------------------------------
 
 datas.append(('assets', 'assets')) 
 
