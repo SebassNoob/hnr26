@@ -157,7 +157,7 @@ export function Configuration() {
 
 				<Input
 					label="Screenshot Frequency"
-					description="Take a screenshot once every n times."
+					description="Take a screenshot once every n minutes."
 					type="number"
 					{...register("screenshotFreqMin", { valueAsNumber: true })}
 					min="1"
