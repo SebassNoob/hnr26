@@ -1,8 +1,7 @@
 import sys
 import random
 import queue  # For the Empty exception
-from pydub import AudioSegment
-from pydub.playback import play
+import threading
 from utils import log
 from PyQt6.QtWidgets import QApplication, QWidget, QMenu
 from PyQt6.QtCore import Qt, QTimer, QPoint, QRect, QUrl
@@ -43,6 +42,7 @@ class MomWidget(QWidget):
         self.original_messages = list(self.messages)
         self.anger = 1  # Anger meter, 1 = normal, higher = angrier
         self.is_animating = False # Flag to prevent animations from overlapping
+        self.mumble_players = []
 
         # --- Audio Setup for Camera ---
         self.audio_output_camera = QAudioOutput()
@@ -161,11 +161,29 @@ class MomWidget(QWidget):
             return "mom.png"
 
     def mumble(self):
+        # Clean up any players that have finished playing to prevent memory leaks
+        self.mumble_players = [
+            (p, o)
+            for p, o in self.mumble_players
+            if p.playbackState() != QMediaPlayer.PlaybackState.StoppedState
+        ]
+
         sounds = [get_asset_path(f"fem{i}.mp3") for i in range(1, 3)]
-        for i in range(3):
+        # The original code played 3 overlapping sounds. We replicate that.
+        for _ in range(3):
             sound_file = random.choice(sounds)
-            sound = AudioSegment.from_file(sound_file, format="mp3")
-            play(sound)
+
+            # Create new player and output objects for each sound
+            player = QMediaPlayer()
+            audio_output = QAudioOutput()
+            player.setAudioOutput(audio_output)
+            player.setSource(QUrl.fromLocalFile(sound_file))
+            audio_output.setVolume(1.0)
+
+            # Keep a reference to prevent Python's garbage collector from deleting them
+            self.mumble_players.append((player, audio_output))
+
+            player.play()
 
     def update_anger(self, delta):
         """Update the anger meter. If it reaches 4, trigger slipper and reset to 3."""
@@ -202,6 +220,7 @@ class MomWidget(QWidget):
         self.bubble.set_target_point(self.get_head_point())
         self.bubble.show()
         self.bubble.activateWindow()
+        self.mumble()
         # Restore original messages after 5 seconds
         QTimer.singleShot(5000, self.restore_bubble_messages)
 
@@ -323,6 +342,7 @@ class MomWidget(QWidget):
         self.bubble.set_target_point(self.get_head_point())
         self.bubble.show()
         self.bubble.activateWindow()
+        self.mumble()
 
     def spawn_popup(self):
         self.popups = [p for p in self.popups if p.isVisible()]
