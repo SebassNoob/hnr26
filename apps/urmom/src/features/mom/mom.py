@@ -1,7 +1,8 @@
 import sys
-import os
 import random
 import queue  # For the Empty exception
+from pydub import AudioSegment
+from pydub.playback import play
 from utils import log
 from PyQt6.QtWidgets import QApplication, QWidget, QMenu
 from PyQt6.QtCore import Qt, QTimer, QPoint, QRect, QUrl
@@ -11,8 +12,6 @@ from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from .bubble import BubbleWidget
 from .popup import PopupWidget
 import signal
-
-from utils import log
 
 # Import SlipperOverlay directly so we can spawn it here
 from features.slipper.slipper import SlipperOverlay 
@@ -152,6 +151,13 @@ class MomWidget(QWidget):
         else:
             log("Invalid anger level, defaulting to neutral")
             return "mom.png"
+
+    def mumble(self):
+        sounds = [get_asset_path(f"fem{i}.mp3") for i in range(1, 3)]
+        for i in range(3):
+            sound_file = random.choice(sounds)
+            sound = AudioSegment.from_file(sound_file, format="mp3")
+            play(sound)
 
     def update_anger(self, delta):
         """Update the anger meter. If it reaches 4, trigger slipper and reset to 3."""
